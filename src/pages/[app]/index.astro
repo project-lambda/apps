@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import { getCollection, getEntry, render } from 'astro:content';
+import AppIcon from '../../components/AppIcon.astro';
 import Base from '../../layouts/Base.astro';
 import AppNav from '../../components/AppNav.astro';
 import StoreButtons from '../../components/StoreButtons.astro';
@@ -24,11 +25,11 @@ if (!policy) {
 const d = app.data;
 ---
 
-<Base title={d.name} description={d.summary} accent={d.accent} image={d.icon.src}>
+<Base title={d.name} description={d.summary} accent={d.accent} image={d.icon?.src}>
   <AppNav app={app} current="overview" hasTerms={!!terms} />
 
   <section class="wrap hero">
-    <Image src={d.icon} alt={`${d.name} icon`} width={120} height={120} class="icon" loading="eager" />
+    <AppIcon app={app} size={120} radius={28} eager />
     <div>
       <h1>{d.name}</h1>
       <p class="tagline">{d.tagline}</p>
@@ -45,7 +46,7 @@ const d = app.data;
             <Image
               src={shot}
               alt={`${d.name} screenshot ${i + 1}`}
-              width={270}
+              height={520}
               densities={[1, 2]}
               class="shot"
             />
@@ -84,7 +85,7 @@ const d = app.data;
 
 <style>
   .hero { display: flex; gap: 32px; align-items: flex-start; padding-top: 48px; padding-bottom: 32px; }
-  .icon { width: 120px; height: 120px; border-radius: 28px; flex: none; box-shadow: var(--shadow); }
+  .hero :global(.app-icon) { box-shadow: var(--shadow); }
   .hero h1 { margin: 0; }
   .tagline { font-size: 1.2rem; font-weight: 600; color: var(--accent-ink); margin: 4px 0 8px; }
   .summary { max-width: 36em; margin: 0 0 20px; }
@@ -96,7 +97,8 @@ const d = app.data;
     scroll-snap-type: x mandatory;
     padding: 8px max(20px, calc((100vw - 1000px) / 2)) 16px;
   }
-  .shot { width: 270px; height: auto; border-radius: 22px; scroll-snap-align: center; flex: none; box-shadow: var(--shadow); }
+  /* Height-based so portrait phone shots and landscape Mac shots line up. */
+  .shot { height: 520px; width: auto; border-radius: 18px; scroll-snap-align: center; flex: none; box-shadow: var(--shadow); }
   .features { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: 16px; }
   .feature { padding: 20px; }
   .feature h3 { margin: 0 0 6px; }
@@ -104,7 +106,6 @@ const d = app.data;
   .links { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 40px; }
   @media (max-width: 640px) {
     .hero { flex-direction: column; gap: 20px; padding-top: 32px; }
-    .icon { width: 96px; height: 96px; border-radius: 22px; }
-    .shot { width: 220px; }
+    .shot { height: 380px; }
   }
 </style>

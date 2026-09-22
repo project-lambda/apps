@@ -5,7 +5,9 @@
   --muted: #5b606b;
   --line: #e4e4e0;
   --accent: #1fc98a;
-  --accent-ink: #0b5c3f;
+  /* Text colour derived from the page accent, dark enough to read on the
+     light background. Each app page sets its own --accent on <html>. */
+  --accent-ink: color-mix(in srgb, var(--accent) 55%, black);
   --radius: 18px;
   --shadow: 0 1px 2px rgb(16 18 24 / 0.04), 0 8px 24px rgb(16 18 24 / 0.06);
   color-scheme: light dark;

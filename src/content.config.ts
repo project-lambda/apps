@@ -26,7 +26,8 @@ const apps = defineCollection({
       tagline: z.string(),
       /** One or two sentences for cards and search results. */
       summary: z.string().max(170),
-      icon: image(),
+      /** 512px icon. Omit it and the site shows a lettered tile instead. */
+      icon: image().optional(),
       screenshots: z.array(image()).default([]),
       /** Brand colour for this app's pages. */
       accent: z.string().regex(/^#[0-9a-fA-F]{6}$/).default('#1FC98A'),

@@ -1,0 +1,49 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  app: CollectionEntry<'apps'>;
+  size: number;
+  radius: number;
+  eager?: boolean;
+}
+
+const { app, size, radius, eager = false } = Astro.props;
+const { icon, name, accent } = app.data;
+---
+
+{
+  icon ? (
+    <Image
+      src={icon}
+      alt=""
+      width={size}
+      height={size}
+      densities={[1, 2]}
+      loading={eager ? 'eager' : 'lazy'}
+      style={`width:${size}px;height:${size}px;border-radius:${radius}px`}
+      class="app-icon"
+    />
+  ) : (
+    // No icon yet: a lettered tile, so an app in progress still has a face.
+    <div
+      class="app-icon letter"
+      aria-hidden="true"
+      style={`width:${size}px;height:${size}px;border-radius:${radius}px;font-size:${Math.round(size * 0.46)}px;--tile:${accent}`}
+    >
+      {name.slice(0, 1)}
+    </div>
+  )
+}
+
+<style>
+  .app-icon { flex: none; align-self: flex-start; }
+  .letter {
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    color: #fff;
+    background: linear-gradient(140deg, var(--tile), color-mix(in srgb, var(--tile) 55%, #000));
+  }
+</style>

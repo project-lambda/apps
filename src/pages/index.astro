@@ -1,6 +1,6 @@
 ---
-import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
+import AppIcon from '../components/AppIcon.astro';
 import Base from '../layouts/Base.astro';
 import { site } from '../site.config';
 import { href } from '../lib/paths';
@@ -21,7 +21,7 @@ const retired = (await getCollection('apps')).filter((a) => a.data.status === 'r
     {
       apps.map((app) => (
         <a class="card app" href={href(`${app.id}/`)} style={`--accent:${app.data.accent}`}>
-          <Image src={app.data.icon} alt="" width={72} height={72} class="icon" />
+          <AppIcon app={app} size={72} radius={18} />
           <div>
             <h2>{app.data.name}</h2>
             <p class="tagline">{app.data.tagline}</p>
@@ -70,7 +70,12 @@ const retired = (await getCollection('apps')).filter((a) => a.data.status === 'r
     transition: transform 0.15s ease, border-color 0.15s ease;
   }
   .app:hover { transform: translateY(-2px); border-color: var(--accent); }
-  .icon { width: 72px; height: 72px; border-radius: 18px; flex: none; align-self: flex-start; }
+  /* --accent-ink is derived where it is declared, so re-derive it here to
+     pick up each card's own accent. */
+  .app { --accent-ink: color-mix(in srgb, var(--accent) 55%, black); }
+  @media (prefers-color-scheme: dark) {
+    .app { --accent-ink: color-mix(in srgb, var(--accent) 70%, white); }
+  }
   .app h2 { margin: 0; font-size: 1.3rem; }
   .tagline { margin: 2px 0 8px; font-weight: 600; color: var(--accent-ink); }
   .summary { margin: 0 0 12px; }
