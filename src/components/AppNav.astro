@@ -1,0 +1,57 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import { href } from '../lib/paths';
+
+interface Props {
+  app: CollectionEntry<'apps'>;
+  current: 'overview' | 'privacy' | 'terms' | 'support' | 'delete-account';
+  hasTerms: boolean;
+}
+
+const { app, current, hasTerms } = Astro.props;
+const tabs = [
+  { key: 'overview', label: 'Overview', path: `${app.id}/` },
+  { key: 'privacy', label: 'Privacy', path: `${app.id}/privacy/` },
+  ...(hasTerms ? [{ key: 'terms', label: 'Terms', path: `${app.id}/terms/` }] : []),
+  { key: 'support', label: 'Support', path: `${app.id}/support/` },
+  ...(app.data.accounts
+    ? [{ key: 'delete-account', label: 'Delete account', path: `${app.id}/delete-account/` }]
+    : []),
+];
+---
+
+<div class="app-nav">
+  <div class="wrap">
+    <a class="identity" href={href(`${app.id}/`)}>
+      <Image src={app.data.icon} alt="" width={40} height={40} densities={[1, 2]} class="icon" loading="eager" />
+      <span>{app.data.name}</span>
+    </a>
+    <nav aria-label={`${app.data.name} pages`}>
+      {tabs.map((t) => (
+        <a href={href(t.path)} aria-current={t.key === current ? 'page' : undefined}>
+          {t.label}
+        </a>
+      ))}
+    </nav>
+  </div>
+</div>
+
+<style>
+  .app-nav { border-bottom: 1px solid var(--line); }
+  .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-top: 12px; padding-bottom: 12px; }
+  .identity { display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--ink); text-decoration: none; }
+  .icon { width: 40px; height: 40px; border-radius: 10px; flex: none; }
+  nav { display: flex; gap: 4px; overflow-x: auto; }
+  nav a {
+    padding: 6px 12px;
+    border-radius: 999px;
+    color: var(--muted);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    white-space: nowrap;
+  }
+  nav a:hover { color: var(--ink); background: var(--line); }
+  nav a[aria-current='page'] { color: var(--accent-ink); background: color-mix(in srgb, var(--accent) 16%, transparent); }
+</style>

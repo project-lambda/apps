@@ -1,0 +1,35 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  app: CollectionEntry<'apps'>;
+}
+
+const { status, stores, name } = Astro.props.app.data;
+const links = [
+  stores.googlePlay && { label: 'Get it on Google Play', url: stores.googlePlay },
+  stores.appStore && { label: 'Download on the App Store', url: stores.appStore },
+  stores.web && { label: 'Open on the web', url: stores.web },
+].filter(Boolean) as { label: string; url: string }[];
+---
+
+{
+  status === 'live' && links.length > 0 ? (
+    <div class="stores">
+      {links.map((l, i) => (
+        <a class:list={['button', { secondary: i > 0 }]} href={l.url} rel="noopener">
+          {l.label}
+        </a>
+      ))}
+    </div>
+  ) : status === 'coming-soon' ? (
+    <p class="soon"><span class="pill">Coming soon</span> {name} is in testing and will be on the stores shortly.</p>
+  ) : status === 'retired' ? (
+    <p class="soon"><span class="pill neutral">No longer available</span> This page stays up for existing users.</p>
+  ) : null
+}
+
+<style>
+  .stores { display: flex; flex-wrap: wrap; gap: 10px; }
+  .soon { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; color: var(--muted); margin: 0; }
+</style>

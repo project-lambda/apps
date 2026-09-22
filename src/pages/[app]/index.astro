@@ -1,0 +1,110 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection, getEntry, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import AppNav from '../../components/AppNav.astro';
+import StoreButtons from '../../components/StoreButtons.astro';
+import { href } from '../../lib/paths';
+
+export async function getStaticPaths() {
+  const apps = await getCollection('apps');
+  return apps.map((app) => ({ params: { app: app.id }, props: { app } }));
+}
+
+const { app } = Astro.props;
+const { Content } = await render(app);
+const [policy, terms] = await Promise.all([
+  getEntry('policies', app.id),
+  getEntry('terms', app.id),
+]);
+// Both stores reject a listing without a privacy policy, so the build does too.
+if (!policy) {
+  throw new Error(`${app.id}: add src/content/apps/${app.id}/privacy.md`);
+}
+const d = app.data;
+---
+
+<Base title={d.name} description={d.summary} accent={d.accent} image={d.icon.src}>
+  <AppNav app={app} current="overview" hasTerms={!!terms} />
+
+  <section class="wrap hero">
+    <Image src={d.icon} alt={`${d.name} icon`} width={120} height={120} class="icon" loading="eager" />
+    <div>
+      <h1>{d.name}</h1>
+      <p class="tagline">{d.tagline}</p>
+      <p class="muted summary">{d.summary}</p>
+      <StoreButtons app={app} />
+    </div>
+  </section>
+
+  {
+    d.screenshots.length > 0 && (
+      <section class="shots" aria-label="Screenshots">
+        <div class="strip">
+          {d.screenshots.map((shot, i) => (
+            <Image
+              src={shot}
+              alt={`${d.name} screenshot ${i + 1}`}
+              width={270}
+              densities={[1, 2]}
+              class="shot"
+            />
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  {
+    d.features.length > 0 && (
+      <section class="wrap">
+        <h2>Features</h2>
+        <div class="features">
+          {d.features.map((f) => (
+            <div class="card feature">
+              <h3>{f.title}</h3>
+              <p class="muted">{f.text}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  <section class="wrap narrow">
+    <h2>About {d.name}</h2>
+    <div class="prose"><Content /></div>
+    <p class="links muted">
+      <a href={href(`${app.id}/privacy/`)}>Privacy policy</a>
+      {terms && <a href={href(`${app.id}/terms/`)}>Terms of use</a>}
+      <a href={href(`${app.id}/support/`)}>Support</a>
+    </p>
+  </section>
+</Base>
+
+<style>
+  .hero { display: flex; gap: 32px; align-items: flex-start; padding-top: 48px; padding-bottom: 32px; }
+  .icon { width: 120px; height: 120px; border-radius: 28px; flex: none; box-shadow: var(--shadow); }
+  .hero h1 { margin: 0; }
+  .tagline { font-size: 1.2rem; font-weight: 600; color: var(--accent-ink); margin: 4px 0 8px; }
+  .summary { max-width: 36em; margin: 0 0 20px; }
+  .shots { padding: 8px 0 16px; }
+  .strip {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 8px max(20px, calc((100vw - 1000px) / 2)) 16px;
+  }
+  .shot { width: 270px; height: auto; border-radius: 22px; scroll-snap-align: center; flex: none; box-shadow: var(--shadow); }
+  .features { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: 16px; }
+  .feature { padding: 20px; }
+  .feature h3 { margin: 0 0 6px; }
+  .feature p { margin: 0; }
+  .links { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 40px; }
+  @media (max-width: 640px) {
+    .hero { flex-direction: column; gap: 20px; padding-top: 32px; }
+    .icon { width: 96px; height: 96px; border-radius: 22px; }
+    .shot { width: 220px; }
+  }
+</style>

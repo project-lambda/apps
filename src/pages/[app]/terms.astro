@@ -1,0 +1,20 @@
+---
+import { getCollection, render } from 'astro:content';
+import Document from '../../components/Document.astro';
+
+export async function getStaticPaths() {
+  const apps = await getCollection('apps');
+  const terms = await getCollection('terms');
+  return terms.flatMap((entry) => {
+    const app = apps.find((a) => a.id === entry.id);
+    return app ? [{ params: { app: app.id }, props: { app, entry } }] : [];
+  });
+}
+
+const { app, entry } = Astro.props;
+const { Content } = await render(entry);
+---
+
+<Document app={app} kind="terms" entry={entry} hasTerms={true}>
+  <Content />
+</Document>

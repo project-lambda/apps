@@ -1,0 +1,60 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import AppNav from '../../components/AppNav.astro';
+import { site } from '../../site.config';
+
+// Google Play requires this page for any app that lets people create an
+// account. It is only built for apps whose app.md has an `accounts` block.
+export async function getStaticPaths() {
+  const apps = await getCollection('apps');
+  return apps
+    .filter((app) => app.data.accounts)
+    .map((app) => ({ params: { app: app.id }, props: { app } }));
+}
+
+const { app } = Astro.props;
+const d = app.data;
+const accounts = d.accounts!;
+const hasTerms = !!(await getEntry('terms', app.id));
+const email = d.supportEmail ?? site.email;
+const subject = encodeURIComponent(`Delete my ${d.name} account`);
+---
+
+<Base
+  title={`Delete your account · ${d.name}`}
+  description={`How to delete your ${d.name} account and the data linked to it.`}
+  accent={d.accent}
+>
+  <AppNav app={app} current="delete-account" hasTerms={hasTerms} />
+  <section class="wrap narrow page prose">
+    <h1>Delete your {d.name} account</h1>
+    <p>This page is from {site.name}, the developer of {d.name}.</p>
+
+    <h2>In the app</h2>
+    <ol>{accounts.steps.map((s) => <li>{s}</li>)}</ol>
+
+    <h2>Without the app</h2>
+    <p>
+      Email <a href={`mailto:${email}?subject=${subject}`}>{email}</a> from the address on your
+      account and ask for it to be deleted. You'll get a confirmation once it's done.
+    </p>
+
+    <h2>What gets deleted</h2>
+    <ul>{accounts.deleted.map((s) => <li>{s}</li>)}</ul>
+
+    {
+      accounts.retained.length > 0 && (
+        <>
+          <h2>What is kept</h2>
+          <ul>{accounts.retained.map((s) => <li>{s}</li>)}</ul>
+          {accounts.retention && <p>{accounts.retention}</p>}
+        </>
+      )
+    }
+  </section>
+</Base>
+
+<style>
+  .page { padding-top: 48px; }
+</style>

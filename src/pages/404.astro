@@ -1,0 +1,16 @@
+---
+import Base from '../layouts/Base.astro';
+import { href } from '../lib/paths';
+---
+
+<Base title="Page not found" description="This page doesn't exist.">
+  <section class="wrap narrow page">
+    <h1>Page not found</h1>
+    <p class="muted">The page you were looking for isn't here.</p>
+    <a class="button" href={href()}>See all apps</a>
+  </section>
+</Base>
+
+<style>
+  .page { padding-top: 80px; }
+</style>

@@ -1,0 +1,72 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import AppNav from '../../components/AppNav.astro';
+import { site } from '../../site.config';
+import { href } from '../../lib/paths';
+
+export async function getStaticPaths() {
+  const apps = await getCollection('apps');
+  return apps.map((app) => ({ params: { app: app.id }, props: { app } }));
+}
+
+const { app } = Astro.props;
+const d = app.data;
+const hasTerms = !!(await getEntry('terms', app.id));
+const email = d.supportEmail ?? site.email;
+const subject = encodeURIComponent(`${d.name} support`);
+---
+
+<Base title={`Support · ${d.name}`} description={`Get help with ${d.name}.`} accent={d.accent}>
+  <AppNav app={app} current="support" hasTerms={hasTerms} />
+  <section class="wrap narrow page">
+    <h1>{d.name} Support</h1>
+    <div class="card contact">
+      <div>
+        <h2>Contact</h2>
+        <p class="muted">Questions, bug reports and feature ideas all go to one inbox. Include your device model and what you were doing when something went wrong.</p>
+      </div>
+      <a class="button" href={`mailto:${email}?subject=${subject}`}>Email {email}</a>
+    </div>
+
+    {
+      d.faq.length > 0 && (
+        <>
+          <h2>Frequently asked questions</h2>
+          <div class="faq">
+            {d.faq.map((item) => (
+              <details class="card">
+                <summary>{item.q}</summary>
+                <p>{item.a}</p>
+              </details>
+            ))}
+          </div>
+        </>
+      )
+    }
+
+    <h2>App details</h2>
+    <dl class="details">
+      <dt>Developer</dt><dd>{site.name}</dd>
+      <dt>Category</dt><dd>{d.category}</dd>
+      {d.packageName && <><dt>Package name</dt><dd><code>{d.packageName}</code></dd></>}
+      <dt>Privacy policy</dt><dd><a href={href(`${app.id}/privacy/`)}>Read the policy</a></dd>
+      {d.accounts && <><dt>Delete your account</dt><dd><a href={href(`${app.id}/delete-account/`)}>How to delete your account</a></dd></>}
+    </dl>
+  </section>
+</Base>
+
+<style>
+  .page { padding-top: 48px; }
+  .contact { padding: 24px; display: flex; flex-direction: column; gap: 16px; align-items: flex-start; }
+  .contact h2 { margin: 0 0 4px; font-size: 1.2rem; }
+  .contact p { margin: 0; }
+  .faq { display: flex; flex-direction: column; gap: 10px; }
+  details { padding: 16px 20px; box-shadow: none; }
+  summary { cursor: pointer; font-weight: 600; }
+  details p { margin: 10px 0 0; color: var(--muted); }
+  .details { display: grid; grid-template-columns: max-content 1fr; gap: 10px 24px; margin: 0; }
+  dt { color: var(--muted); }
+  dd { margin: 0; }
+  code { font-size: 0.9em; background: var(--line); padding: 0.1em 0.35em; border-radius: 6px; }
+</style>

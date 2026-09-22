@@ -1,0 +1,88 @@
+---
+import '../styles/global.css';
+import { site } from '../site.config';
+import { href } from '../lib/paths';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Brand colour for this page; defaults to the site accent. */
+  accent?: string;
+  /** Social preview image, an absolute or site-relative URL. */
+  image?: string;
+}
+
+const { title, description, accent = site.accent, image } = Astro.props;
+const fullTitle = title === site.name ? title : `${title} · ${site.name}`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImage = image ? new URL(image, Astro.site).toString() : undefined;
+const year = new Date().getFullYear();
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href={href('favicon.svg')} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    <meta name="theme-color" content={accent} />
+    <style is:inline define:vars={{ pageAccent: accent }}>
+      :root { --accent: var(--pageAccent); }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="wrap bar">
+        <a class="brand" href={href()}>{site.name}</a>
+        <nav aria-label="Site">
+          <a href={href()}>Apps</a>
+          <a href={`mailto:${site.email}`}>Contact</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap bar">
+        <p>© {year} {site.name}</p>
+        <p><a href={`mailto:${site.email}`}>{site.email}</a></p>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style>
+  .site-header {
+    border-bottom: 1px solid var(--line);
+    background: color-mix(in srgb, var(--bg) 85%, transparent);
+    backdrop-filter: blur(10px);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: 60px;
+  }
+  .brand { font-weight: 700; color: var(--ink); text-decoration: none; letter-spacing: -0.01em; }
+  nav { display: flex; gap: 20px; }
+  nav a { color: var(--muted); text-decoration: none; font-weight: 500; }
+  nav a:hover { color: var(--ink); }
+  .site-footer { border-top: 1px solid var(--line); margin-top: 80px; color: var(--muted); font-size: 0.9rem; }
+  .site-footer p { margin: 0; }
+  .site-footer .bar { flex-wrap: wrap; padding-block: 16px; }
+</style>

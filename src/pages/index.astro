@@ -1,0 +1,79 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import { site } from '../site.config';
+import { href } from '../lib/paths';
+
+const apps = (await getCollection('apps'))
+  .filter((a) => a.data.status !== 'retired')
+  .sort((a, b) => a.data.order - b.data.order || a.data.name.localeCompare(b.data.name));
+const retired = (await getCollection('apps')).filter((a) => a.data.status === 'retired');
+---
+
+<Base title={site.name} description={`Apps by ${site.name}. ${site.tagline}`}>
+  <section class="wrap hero">
+    <h1>Apps by {site.name}</h1>
+    <p class="lede muted">{site.tagline}</p>
+  </section>
+
+  <section class="wrap grid" aria-label="Apps">
+    {
+      apps.map((app) => (
+        <a class="card app" href={href(`${app.id}/`)} style={`--accent:${app.data.accent}`}>
+          <Image src={app.data.icon} alt="" width={72} height={72} class="icon" />
+          <div>
+            <h2>{app.data.name}</h2>
+            <p class="tagline">{app.data.tagline}</p>
+            <p class="muted summary">{app.data.summary}</p>
+            <p class="meta">
+              {app.data.status === 'coming-soon' && <span class="pill">Coming soon</span>}
+              <span class="pill neutral">{app.data.category}</span>
+            </p>
+          </div>
+        </a>
+      ))
+    }
+  </section>
+
+  {
+    retired.length > 0 && (
+      <section class="wrap retired">
+        <h2>Earlier apps</h2>
+        <ul>
+          {retired.map((app) => (
+            <li>
+              <a href={href(`${app.id}/`)}>{app.data.name}</a>
+              <span class="muted"> · <a href={href(`${app.id}/privacy/`)}>privacy policy</a></span>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+</Base>
+
+<style>
+  .hero { padding-top: 72px; padding-bottom: 40px; }
+  .lede { font-size: 1.2rem; max-width: 36em; margin: 0; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 440px), 1fr));
+    gap: 20px;
+  }
+  .app {
+    display: flex;
+    gap: 20px;
+    padding: 24px;
+    color: inherit;
+    text-decoration: none;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+  }
+  .app:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .icon { width: 72px; height: 72px; border-radius: 18px; flex: none; align-self: flex-start; }
+  .app h2 { margin: 0; font-size: 1.3rem; }
+  .tagline { margin: 2px 0 8px; font-weight: 600; color: var(--accent-ink); }
+  .summary { margin: 0 0 12px; }
+  .meta { display: flex; gap: 8px; flex-wrap: wrap; margin: 0; }
+  .retired ul { padding-left: 1.2em; }
+</style>
