@@ -133,9 +133,9 @@ const d = app.data;
 <script>
   // Arrow controls for the screenshot strip. Kept out of the animation
   // bundle so they still work with reduced motion, where that never loads.
-  const strip = document.querySelector('[data-shots]');
-  const prev = document.querySelector('[data-shots-prev]');
-  const next = document.querySelector('[data-shots-next]');
+  const strip = document.querySelector<HTMLElement>('[data-shots]');
+  const prev = document.querySelector<HTMLButtonElement>('[data-shots-prev]');
+  const next = document.querySelector<HTMLButtonElement>('[data-shots-next]');
 
   if (strip && prev && next) {
     const step = () => Math.max(240, strip.clientWidth * 0.7);
@@ -147,7 +147,7 @@ const d = app.data;
       prev.disabled = strip.scrollLeft < 12;
       next.disabled = strip.scrollLeft > overflow - 12;
     };
-    const go = (dir) => {
+    const go = (dir: number) => {
       strip.closest('.showcase')?.classList.add('touched');
       strip.scrollBy({ left: dir * step(), behavior: 'smooth' });
     };
