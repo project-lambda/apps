@@ -40,11 +40,18 @@ html, body { margin: 0; }
 /* No scrollbars anywhere: the page scrolls smoothly on its own and the
    screenshot strips carry arrow buttons instead. Scrolling itself, by wheel,
    trackpad, touch, keyboard or the arrows, is untouched. */
-html { scrollbar-width: none; -ms-overflow-style: none; }
+html {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  overflow-x: hidden;
+  overflow-x: clip;   /* clip does not create a scroll container */
+  max-width: 100%;
+}
 * { scrollbar-width: none; }
 ::-webkit-scrollbar { width: 0; height: 0; }
 body {
   color: var(--ink);
+  max-width: 100vw;
   min-height: 100svh;
   display: flex;
   flex-direction: column;

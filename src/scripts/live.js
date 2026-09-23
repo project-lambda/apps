@@ -14,6 +14,9 @@ import Lenis from 'lenis';
 
 const lerp = (a, b, t) => a + (b - a) * t;
 
+/** Phones and tablets: no cursor to trail, and less GPU to spend. */
+const coarsePointer = matchMedia('(pointer: coarse)').matches;
+
 /** One source of truth for pointer and scroll, read by everything below. */
 const M = {
   x: innerWidth / 2, y: innerHeight / 2,
@@ -233,7 +236,7 @@ export function start() {
     } catch {
       return null;                              // no WebGL: the page still works
     }
-    renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
+    renderer.setPixelRatio(Math.min(devicePixelRatio, coarsePointer ? 1.3 : 1.75));
     renderer.setSize(innerWidth, innerHeight);
 
     const dark = () => document.documentElement.dataset.theme !== 'light';
@@ -395,9 +398,10 @@ export function start() {
         linkGeo.attributes.position.needsUpdate = true;
         linkGeo.attributes.aAlpha.needsUpdate = true;
 
+        // Sparkles trail a cursor, so they are pointless on a touch screen.
         const moved = Math.hypot(M.x - M.px, M.y - M.py);
         M.px = M.x; M.py = M.y;
-        let budget = Math.min(6, Math.round(moved / 9)) + (M.down ? 3 : 0);
+        let budget = coarsePointer ? 0 : Math.min(6, Math.round(moved / 9)) + (M.down ? 3 : 0);
         for (let i = 0; i < SPARKS && budget > 0; i++) {
           if (sLife[i] > 0) continue;
           sPos[i * 3] = M.px + (Math.random() - 0.5) * 16;
