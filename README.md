@@ -46,9 +46,12 @@ npm run build    # writes the site to dist/
 3. Every push to `main` now builds and deploys the site. The first address
    is `https://<username>.github.io/<repo>/`.
 
-To use your own domain, add it under Settings, Pages, Custom domain, and
-point its DNS at GitHub Pages as that screen explains. The workflow picks up
-the new address on the next deploy, so no code changes are needed.
+### Custom domain
 
-Store listings should link to the privacy page, for example
-`https://yourdomain.com/framely/privacy/`.
+The site is served at <https://emroze.dev>. `public/CNAME` holds that domain
+and ships with every deploy, which is how a Pages site deployed by Actions
+keeps its custom domain. Change the domain in that file and in the
+repository's Settings, Pages, Custom domain.
+
+Store listings link to the privacy page, for example
+<https://emroze.dev/framely/privacy/>.
