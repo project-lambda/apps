@@ -25,10 +25,11 @@ const subject = encodeURIComponent(`Delete my ${d.name} account`);
   title={`Delete your account · ${d.name}`}
   description={`How to delete your ${d.name} account and the data linked to it.`}
   accent={d.accent}
+  calm
 >
   <AppNav app={app} current="delete-account" hasTerms={hasTerms} />
   <section class="wrap narrow page prose">
-    <h1>Delete your {d.name} account</h1>
+    <h1 class="r">Delete your {d.name} account</h1>
     <p>This page is from {site.name}, the developer of {d.name}.</p>
 
     <h2>In the app</h2>
@@ -56,5 +57,5 @@ const subject = encodeURIComponent(`Delete my ${d.name} account`);
 </Base>
 
 <style>
-  .page { padding-top: 48px; }
+  .page { padding-top: 56px; }
 </style>

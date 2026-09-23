@@ -2,6 +2,8 @@
 import '../styles/global.css';
 import { site } from '../site.config';
 import { href } from '../lib/paths';
+import Backdrop from '../components/Backdrop.astro';
+import Logo from '../components/Logo.astro';
 
 interface Props {
   title: string;
@@ -10,9 +12,11 @@ interface Props {
   accent?: string;
   /** Social preview image, an absolute or site-relative URL. */
   image?: string;
+  /** Long-form pages dim the backdrop so body text stays comfortable. */
+  calm?: boolean;
 }
 
-const { title, description, accent = site.accent, image } = Astro.props;
+const { title, description, accent = site.accent, image, calm = false } = Astro.props;
 const fullTitle = title === site.name ? title : `${title} · ${site.name}`;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const ogImage = image ? new URL(image, Astro.site).toString() : undefined;
@@ -20,7 +24,7 @@ const year = new Date().getFullYear();
 ---
 
 <!doctype html>
-<html lang="en" style={`--accent: ${accent}`}>
+<html lang="en" class:list={{ calm }} style={`--accent: ${accent}`}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -28,6 +32,12 @@ const year = new Date().getFullYear();
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/svg+xml" href={href('favicon.svg')} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap"
+      rel="stylesheet"
+    />
     <meta property="og:type" content="website" />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
@@ -36,10 +46,15 @@ const year = new Date().getFullYear();
     <meta name="theme-color" content={accent} />
   </head>
   <body>
-    <header class="site-header">
+    <Backdrop />
+
+    <header class="site-header" data-header>
       <div class="wrap bar">
-        <a class="brand" href={href()}>{site.name}</a>
-        <nav aria-label="Site">
+        <a class="brand" href={href()} data-cursor>
+          <Logo size={27} id="brand-mark" />
+          {site.name}
+        </a>
+        <nav class="site-nav" aria-label="Site">
           <a href={href()}>Apps</a>
           <a href={`mailto:${site.email}`}>Contact</a>
         </nav>
@@ -51,35 +66,17 @@ const year = new Date().getFullYear();
     </main>
 
     <footer class="site-footer">
-      <div class="wrap bar">
-        <p>© {year} {site.name}</p>
-        <p><a href={`mailto:${site.email}`}>{site.email}</a></p>
+      <div class="wrap">
+        <div class="foot">
+          <p>© {year} {site.name} · {site.location}</p>
+          <p><a href={`mailto:${site.email}`}>{site.email}</a></p>
+        </div>
+        <button class="wordmark" data-top data-cursor aria-label="Back to top">
+          <Logo size={96} id="foot-mark" />
+          <span class="wm-text" data-wordmark>emroze.dev</span>
+          <span class="wm-hint">back to top ↑</span>
+        </button>
       </div>
     </footer>
   </body>
 </html>
-
-<style>
-  .site-header {
-    border-bottom: 1px solid var(--line);
-    background: color-mix(in srgb, var(--bg) 85%, transparent);
-    backdrop-filter: blur(10px);
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
-  .bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    min-height: 60px;
-  }
-  .brand { font-weight: 700; color: var(--ink); text-decoration: none; letter-spacing: -0.01em; }
-  nav { display: flex; gap: 20px; }
-  nav a { color: var(--muted); text-decoration: none; font-weight: 500; }
-  nav a:hover { color: var(--ink); }
-  .site-footer { border-top: 1px solid var(--line); margin-top: 80px; color: var(--muted); font-size: 0.9rem; }
-  .site-footer p { margin: 0; }
-  .site-footer .bar { flex-wrap: wrap; padding-block: 16px; }
-</style>

@@ -17,11 +17,11 @@ const email = d.supportEmail ?? site.email;
 const subject = encodeURIComponent(`${d.name} support`);
 ---
 
-<Base title={`Support · ${d.name}`} description={`Get help with ${d.name}.`} accent={d.accent}>
+<Base title={`Support · ${d.name}`} description={`Get help with ${d.name}.`} accent={d.accent} calm>
   <AppNav app={app} current="support" hasTerms={hasTerms} />
   <section class="wrap narrow page">
-    <h1>{d.name} Support</h1>
-    <div class="card contact">
+    <h1 class="r">{d.name} Support</h1>
+    <div class="card contact r">
       <div>
         <h2>Contact</h2>
         <p class="muted">Questions, bug reports and feature ideas all go to one inbox. Include your device model and what you were doing when something went wrong.</p>
@@ -32,10 +32,10 @@ const subject = encodeURIComponent(`${d.name} support`);
     {
       d.faq.length > 0 && (
         <>
-          <h2>Frequently asked questions</h2>
+          <h2 class="r">Frequently asked questions</h2>
           <div class="faq">
             {d.faq.map((item) => (
-              <details class="card">
+              <details class="card r">
                 <summary>{item.q}</summary>
                 <p>{item.a}</p>
               </details>
@@ -45,8 +45,8 @@ const subject = encodeURIComponent(`${d.name} support`);
       )
     }
 
-    <h2>App details</h2>
-    <dl class="details">
+    <h2 class="r">App details</h2>
+    <dl class="details r">
       <dt>Developer</dt><dd>{site.name}</dd>
       <dt>Category</dt><dd>{d.category}</dd>
       {d.packageName && <><dt>Package name</dt><dd><code>{d.packageName}</code></dd></>}
@@ -57,7 +57,8 @@ const subject = encodeURIComponent(`${d.name} support`);
 </Base>
 
 <style>
-  .page { padding-top: 48px; }
+  .page { padding-top: 56px; }
+  .card { padding: 24px; }
   .contact { padding: 24px; display: flex; flex-direction: column; gap: 16px; align-items: flex-start; }
   .contact h2 { margin: 0 0 4px; font-size: 1.2rem; }
   .contact p { margin: 0; }

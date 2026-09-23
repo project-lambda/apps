@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" role="img" aria-label="emroze.dev">
+  <path d="M24 11a13 13 0 1 0 13 13" stroke="currentColor" stroke-width="3.6" fill="none" stroke-linecap="round"/>
+  <circle cx="24" cy="24" r="2.6" fill="currentColor" fill-opacity=".7"/>
+  <circle cx="34" cy="14" r="4.2" fill="currentColor"/>
+</svg>

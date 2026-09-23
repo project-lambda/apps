@@ -1,0 +1,21 @@
+---
+/**
+ * The live layer: WebGL canvas, cursor, grain and vignette. The script is
+ * loaded only when the visitor has not asked for reduced motion, so the
+ * three.js bundle never downloads for people who would not see it.
+ */
+---
+
+<canvas class="gl" data-gl></canvas>
+<div class="vignette"></div>
+<div class="grain"></div>
+<div class="cursor"></div>
+<div class="cursor-ring"></div>
+<div class="progress"></div>
+
+<script>
+  document.documentElement.classList.add('js');
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    import('../scripts/live.js').then((m) => m.start()).catch(() => {});
+  }
+</script>

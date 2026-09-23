@@ -1,0 +1,31 @@
+---
+/** The Orbit mark: a node riding an open ring. */
+interface Props {
+  size?: number;
+  /** Unique gradient id, since several marks can share a page. */
+  id?: string;
+  class?: string;
+}
+const { size = 27, id = 'orbit', class: cls = '' } = Astro.props;
+---
+
+<svg
+  class:list={['logo', cls]}
+  width={size}
+  height={size}
+  viewBox="0 0 48 48"
+  aria-hidden="true"
+  style={`border-radius:${Math.round(size * 0.25)}px`}
+>
+  <defs>
+    <linearGradient id={id} x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#34D399" />
+      <stop offset="1" stop-color="#6366F1" />
+    </linearGradient>
+  </defs>
+  <rect width="48" height="48" rx="12" fill={`url(#${id})`} />
+  <path d="M24 11a13 13 0 1 0 13 13" stroke="#fff" stroke-width="3.6" fill="none" stroke-linecap="round" />
+  <circle cx="24" cy="24" r="2.6" fill="#fff" fill-opacity=".8" />
+  <g class="orbit trail"><circle cx="34" cy="14" r="4.2" fill="#fff" /></g>
+  <g class="orbit"><circle cx="34" cy="14" r="4.2" fill="#fff" /></g>
+</svg>

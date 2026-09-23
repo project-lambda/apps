@@ -1,0 +1,932 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mockup 3D · emroze.dev</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='12' fill='%2334D399'/%3E%3Cpath d='M24 11a13 13 0 1 0 13 13' stroke='%23fff' stroke-width='4.2' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='34' cy='14' r='4.6' fill='%23fff'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+<style>
+@property --spot-x { syntax: '<length>'; initial-value: 50%; inherits: false; }
+@property --spot-y { syntax: '<length>'; initial-value: 50%; inherits: false; }
+@property --sweep { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+
+:root {
+  --bg: #05070d;
+  --surface: color-mix(in oklab, #0d1119 74%, transparent);
+  --surface-2: #171b24;
+  --ink: #f3f5f9;
+  --muted: #98a0af;
+  --line: color-mix(in oklab, #232b3a 82%, transparent);
+  --accent: #1fc98a;
+  --accent-ink: color-mix(in oklab, var(--accent) 78%, white);
+  --radius: 22px;
+  --ease-out: cubic-bezier(.16,1,.3,1);
+  --ease: cubic-bezier(.22,.61,.36,1);
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  color-scheme: dark;
+}
+:root[data-theme='light'] {
+  --bg: #f7f7f5;
+  --surface: color-mix(in oklab, #ffffff 74%, transparent);
+  --surface-2: #eeefec;
+  --ink: #13151a;
+  --muted: #5b616c;
+  --line: color-mix(in oklab, #d9dad5 85%, transparent);
+  --accent-ink: color-mix(in oklab, var(--accent) 58%, black);
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0; color: var(--ink); line-height: 1.6;
+  background:
+    radial-gradient(120% 80% at 50% -10%, color-mix(in oklab, var(--accent) 12%, transparent), transparent 60%),
+    radial-gradient(90% 60% at 88% 12%, color-mix(in oklab, #4f46e5 14%, transparent), transparent 62%),
+    var(--bg);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased; overflow-x: hidden;
+}
+img { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+h1, h2, h3 { margin: 0; font-weight: 600; line-height: 1.04; letter-spacing: -.035em; }
+.wrap { width: min(1120px, 100% - 44px); margin-inline: auto; position: relative; z-index: 2; }
+.serif { font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; }
+.muted { color: var(--muted); }
+
+/* WebGL canvas sits behind everything and never eats clicks. */
+#gl { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+/* Darkens the outer edges so the network reads as depth, not wallpaper. */
+.vignette { position: fixed; inset: 0; z-index: 1; pointer-events: none;
+  background: radial-gradient(75% 60% at 50% 45%, transparent 40%, color-mix(in oklab, var(--bg) 88%, transparent) 100%); }
+.grain {
+  position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: .045; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ── custom cursor ─────────────────────────────────────────── */
+.cursor, .cursor-ring { position: fixed; top: 0; left: 0; z-index: 90; pointer-events: none; border-radius: 50%; }
+.cursor { width: 7px; height: 7px; background: var(--accent); translate: -50% -50%; }
+.cursor-ring {
+  width: 38px; height: 38px; border: 1px solid color-mix(in oklab, var(--ink) 45%, transparent);
+  translate: -50% -50%; transition: width .35s var(--ease-out), height .35s var(--ease-out),
+    background-color .35s var(--ease), border-color .35s var(--ease);
+}
+.cursor-ring.hot {
+  width: 64px; height: 64px; border-color: transparent;
+  background: color-mix(in oklab, var(--accent) 22%, transparent);
+  backdrop-filter: blur(2px);
+}
+.cursor-ring.press { width: 26px; height: 26px; }
+@media (pointer: coarse) { .cursor, .cursor-ring { display: none; } }
+
+/* ── header ────────────────────────────────────────────────── */
+.progress { position: fixed; inset: 0 0 auto 0; height: 2px; z-index: 80; transform-origin: 0 50%; transform: scaleX(0);
+  background: linear-gradient(90deg, var(--accent), #7c5cff); }
+header {
+  position: fixed; inset: 0 0 auto 0; z-index: 70; transition: background .5s var(--ease), border-color .5s var(--ease);
+  border-bottom: 1px solid transparent;
+}
+header.stuck { background: color-mix(in oklab, var(--bg) 66%, transparent); backdrop-filter: blur(16px) saturate(150%); border-bottom-color: var(--line); }
+.bar { display: flex; align-items: center; justify-content: space-between; height: 70px; }
+.brand { display: flex; align-items: center; gap: 11px; font-weight: 600; letter-spacing: -.02em; }
+.brand .mark { border-radius: 8px; transition: transform .5s var(--ease-out), filter .5s var(--ease); }
+.brand:hover .mark { transform: scale(1.09); filter: drop-shadow(0 4px 14px color-mix(in oklab, var(--accent) 45%, transparent)); }
+/* The node rides the ring, with a faint copy trailing just behind it. */
+.brand .orbit { transform-origin: 24px 24px; animation: orbit 9s linear infinite; }
+.brand .orbit.trail { opacity: .3; animation-delay: -.34s; }
+@keyframes orbit { to { transform: rotate(360deg); } }
+nav { display: flex; align-items: center; gap: 4px; }
+nav a { position: relative; padding: 9px 15px; border-radius: 999px; color: var(--muted); font-size: .95rem; font-weight: 500; transition: color .3s var(--ease); }
+nav a span.bgpill { position: absolute; inset: 0; border-radius: inherit; background: var(--surface-2); opacity: 0; transform: scale(.8); transition: opacity .3s, transform .45s var(--ease-out); z-index: -1; }
+nav a:hover { color: var(--ink); }
+nav a:hover span.bgpill { opacity: 1; transform: scale(1); }
+.theme-toggle { width: 38px; height: 38px; display: grid; place-items: center; margin-left: 8px; border: 1px solid var(--line);
+  border-radius: 12px; background: var(--surface); color: var(--muted); cursor: pointer; transition: transform .4s var(--ease-out), color .3s; }
+.theme-toggle:hover { transform: rotate(-14deg) scale(1.08); color: var(--ink); }
+
+/* ── hero ──────────────────────────────────────────────────── */
+.hero { min-height: 100svh; display: grid; align-content: center; padding: 140px 0 90px; position: relative; }
+.eyebrow { display: inline-flex; align-items: center; gap: 9px; padding: 7px 15px 7px 9px; border: 1px solid var(--line);
+  border-radius: 999px; background: var(--surface); backdrop-filter: blur(8px); font-size: .85rem; color: var(--muted); margin-bottom: 28px; }
+.eyebrow b { color: var(--ink); font-weight: 500; }
+.ping { position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); margin-left: 4px; }
+.ping::after { content: ''; position: absolute; inset: -4px; border-radius: 50%; border: 1px solid var(--accent); animation: ping 2.4s var(--ease-out) infinite; }
+@keyframes ping { 0% { transform: scale(.6); opacity: .9; } 100% { transform: scale(2); opacity: 0; } }
+
+h1.display { font-size: clamp(3rem, 8.6vw, 6.6rem); max-width: 15ch; }
+.char { display: inline-block; will-change: transform, opacity, filter; }
+.word { display: inline-block; white-space: nowrap; }
+.lede { font-size: clamp(1.05rem, 1.55vw, 1.3rem); color: var(--muted); max-width: 46ch; margin: 28px 0 36px; }
+.cta-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.btn { position: relative; display: inline-flex; align-items: center; gap: 10px; padding: 15px 24px; border-radius: 15px;
+  font-weight: 500; background: var(--ink); color: var(--bg); overflow: hidden; will-change: transform; }
+.btn.ghost { background: color-mix(in oklab, var(--surface) 80%, transparent); color: var(--ink); border: 1px solid var(--line); backdrop-filter: blur(8px); }
+.btn::after { content: ''; position: absolute; inset: 0; translate: -130% 0; background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--accent) 65%, white), transparent); opacity: .55; transition: translate .8s var(--ease); }
+.btn:hover::after { translate: 130% 0; }
+.btn .arrow { transition: transform .4s var(--ease-out); }
+.btn:hover .arrow { transform: translateX(5px); }
+.scroll-hint { position: absolute; bottom: 34px; left: 50%; translate: -50% 0; color: var(--muted); font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.scroll-hint i { width: 1px; height: 46px; background: linear-gradient(var(--muted), transparent); animation: drop 2.2s var(--ease) infinite; }
+@keyframes drop { 0% { transform: scaleY(0); transform-origin: top; } 60% { transform: scaleY(1); transform-origin: top; } 100% { transform: scaleY(0); transform-origin: bottom; } }
+
+/* ── reveal ────────────────────────────────────────────────── */
+.r { opacity: 0; transform: translateY(30px); transition: opacity .9s var(--ease-out), transform 1s var(--ease-out); will-change: transform, opacity; }
+.r.in { opacity: 1; transform: none; }
+
+/* ── sections ──────────────────────────────────────────────── */
+.section-head { display: flex; align-items: end; justify-content: space-between; gap: 22px; margin: 0 0 28px; }
+.section-head h2 { font-size: clamp(1.8rem, 3.6vw, 2.8rem); }
+section.block { padding: 110px 0; position: relative; z-index: 2; }
+.count { color: var(--muted); font-size: .9rem; font-variant-numeric: tabular-nums; }
+
+.cards { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr)); }
+.card {
+  position: relative; padding: 28px; border-radius: var(--radius); isolation: isolate; overflow: hidden;
+  background: var(--surface); backdrop-filter: blur(14px) saturate(130%);
+  border: 1px solid var(--line); transform-style: preserve-3d; will-change: transform;
+  transition: transform .45s var(--ease-out), border-color .45s var(--ease), box-shadow .45s var(--ease);
+}
+.card::before { content: ''; position: absolute; inset: -1px; z-index: -1; border-radius: inherit; opacity: 0; transition: opacity .5s var(--ease);
+  background: radial-gradient(460px circle at var(--spot-x) var(--spot-y), color-mix(in oklab, var(--accent) 32%, transparent), transparent 62%); }
+.card::after { content: ''; position: absolute; inset: 0; z-index: 3; pointer-events: none; opacity: 0; transition: opacity .5s var(--ease);
+  background: radial-gradient(220px circle at var(--spot-x) var(--spot-y), color-mix(in oklab, white 16%, transparent), transparent 60%); }
+.card:hover { border-color: color-mix(in oklab, var(--accent) 38%, var(--line)); box-shadow: 0 24px 60px color-mix(in oklab, var(--accent) 12%, transparent); }
+.card:hover::before, .card:hover::after { opacity: 1; }
+.card-top { display: flex; align-items: center; gap: 16px; }
+.icon { width: 64px; height: 64px; border-radius: 18px; flex: none; transition: transform .6s var(--ease-out); }
+.card:hover .icon { transform: translateZ(40px) rotate(-5deg) scale(1.06); }
+.card h3 { font-size: 1.3rem; }
+.tag { font-size: .84rem; color: var(--accent-ink); font-weight: 500; }
+.card p { color: var(--muted); font-size: .96rem; margin: 18px 0; }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip { font-size: .78rem; padding: 5px 11px; border-radius: 999px; background: color-mix(in oklab, var(--accent) 16%, transparent); color: var(--accent-ink); }
+.chip.plain { background: var(--surface-2); color: var(--muted); }
+.go { position: absolute; right: 24px; bottom: 24px; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%;
+  background: var(--surface-2); color: var(--muted); opacity: 0; transform: translateX(-8px); transition: all .45s var(--ease-out); }
+.card:hover .go { opacity: 1; transform: translateZ(30px); color: var(--ink); }
+
+/* ── marquee ───────────────────────────────────────────────── */
+.showcase { position: relative; z-index: 2; padding: 20px 0 40px; }
+.rail { display: flex; gap: 18px; width: max-content; will-change: transform; }
+.rail img { height: 380px; width: auto; border-radius: 18px; border: 1px solid var(--line); filter: saturate(.9) brightness(.95);
+  transition: transform .6s var(--ease-out), filter .6s var(--ease); }
+.rail img:hover { transform: translateY(-10px) scale(1.03); filter: none; }
+.fade-l, .fade-r { position: absolute; top: 0; bottom: 0; width: 160px; z-index: 3; pointer-events: none; }
+.fade-l { left: 0; background: linear-gradient(90deg, var(--bg), transparent); }
+.fade-r { right: 0; background: linear-gradient(270deg, var(--bg), transparent); }
+
+/* ── values ────────────────────────────────────────────────── */
+.values { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); }
+.value { padding: 28px; border-radius: 18px; border: 1px solid var(--line); background: var(--surface); backdrop-filter: blur(10px); }
+.value .num { font-family: 'Instrument Serif', serif; font-size: 2.6rem; line-height: 1; color: var(--accent-ink); font-variant-numeric: tabular-nums; }
+.value h3 { font-size: 1.05rem; margin: 14px 0 6px; }
+.value p { margin: 0; color: var(--muted); font-size: .93rem; }
+
+/* ── footer ────────────────────────────────────────────────── */
+footer { position: relative; z-index: 2; border-top: 1px solid var(--line); padding: 50px 0 70px; }
+.foot { display: flex; justify-content: space-between; gap: 22px; flex-wrap: wrap; color: var(--muted); font-size: .92rem; }
+.foot a { color: var(--accent-ink); }
+/* Footer lockup: the mark on the baseline, the name in a gradient that
+   drifts, and letters that lift as the cursor passes over them. */
+.wordmark {
+  display: flex; align-items: center; gap: clamp(12px, 2vw, 26px);
+  margin-top: 52px; padding: 0; width: 100%;
+  background: none; border: 0; color: inherit; font: inherit; text-align: left;
+  cursor: pointer; position: relative;
+}
+.wm-mark { width: clamp(46px, 9vw, 104px); height: auto; border-radius: clamp(11px, 2.2vw, 26px); flex: none;
+  transition: transform .6s var(--ease-out); }
+.wordmark:hover .wm-mark { transform: rotate(-8deg) scale(1.05); }
+.wm-text {
+  font-size: clamp(2.6rem, 13vw, 9.5rem); line-height: .86; letter-spacing: -.055em; font-weight: 600;
+  user-select: none; white-space: nowrap; color: var(--ink);
+}
+/* Each letter carries a slice of one gradient, because background-clip: text
+   stops working once the letters become separate inline-block boxes. */
+.wm-char {
+  display: inline-block; will-change: transform, background-position;
+  background-image: linear-gradient(100deg, #34D399, #6366F1 45%, #38BDF8 72%, #34D399);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.wm-hint { position: absolute; right: 2px; top: -22px; font-size: .78rem; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--muted); opacity: 0; transform: translateY(6px);
+  transition: opacity .4s var(--ease), transform .5s var(--ease-out); }
+.wordmark:hover .wm-hint { opacity: 1; transform: none; }
+@media (max-width: 620px) { .wm-hint { display: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; }
+  .r { opacity: 1; transform: none; }
+  .cursor, .cursor-ring, #gl, .grain { display: none; }
+}
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+<div class="vignette"></div>
+<div class="grain"></div>
+<div class="progress" id="prog"></div>
+<div class="cursor" id="cur"></div>
+<div class="cursor-ring" id="ring"></div>
+
+<header id="head">
+  <div class="wrap bar">
+    <a class="brand" href="#" data-cursor>
+      <svg class="mark" width="27" height="27" viewBox="0 0 48 48" aria-hidden="true">
+        <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#34D399"/><stop offset="1" stop-color="#6366F1"/>
+        </linearGradient></defs>
+        <rect width="48" height="48" rx="12" fill="url(#lg)"/>
+        <path d="M24 11a13 13 0 1 0 13 13" stroke="#fff" stroke-width="3.6" fill="none" stroke-linecap="round"/>
+        <circle cx="24" cy="24" r="2.6" fill="#fff" fill-opacity=".8"/>
+        <g class="orbit trail"><circle cx="34" cy="14" r="4.2" fill="#fff"/></g>
+        <g class="orbit"><circle cx="34" cy="14" r="4.2" fill="#fff"/></g>
+      </svg>
+      Abdullah Emroze
+    </a>
+    <nav>
+      <a href="#apps" data-cursor><span class="bgpill"></span>Apps</a>
+      <a href="#values" data-cursor><span class="bgpill"></span>About</a>
+      <a href="#contact" data-cursor><span class="bgpill"></span>Contact</a>
+      <button class="theme-toggle" id="theme" aria-label="Switch theme" data-cursor>◐</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <span class="eyebrow r"><b>4 apps</b> in the workshop <i class="ping"></i></span>
+      <h1 class="display" data-split>Small tools, built with <i class="serif">care</i> and no tracking.</h1>
+      <p class="lede r">Apps that do one job well, keep your data on your device, and never ask you to sign in. Made in Dhaka, shipped worldwide.</p>
+      <div class="cta-row r">
+        <a class="btn magnetic" href="#apps" data-cursor>Browse the apps <span class="arrow">→</span></a>
+        <a class="btn ghost magnetic" href="#contact" data-cursor>Get in touch</a>
+      </div>
+    </div>
+    <div class="scroll-hint">Scroll <i></i></div>
+  </section>
+
+  <section class="block" id="apps">
+    <div class="wrap">
+      <div class="section-head r"><h2>The apps</h2><span class="count">04 — 2026</span></div>
+      <div class="cards">
+        <a class="card r" style="--accent:#1fc98a" href="#" data-cursor>
+          <div class="card-top">
+            <img class="icon" src="../src/content/apps/framely/icon.png" alt="" />
+            <div><h3>Framely</h3><span class="tag">Store-ready screenshots</span></div>
+          </div>
+          <p>Turn plain app screenshots into polished App Store and Google Play images, with device frames, matched backdrops and captions.</p>
+          <div class="chips"><span class="chip">Coming soon</span><span class="chip plain">Productivity</span></div>
+          <span class="go">→</span>
+        </a>
+        <a class="card r" style="--accent:#38bdf8" href="#" data-cursor>
+          <div class="card-top">
+            <img class="icon" src="../src/content/apps/tidymac/icon.png" alt="" />
+            <div><h3>TidyMac</h3><span class="tag">Clean, uninstall, watch</span></div>
+          </div>
+          <p>A native Mac app that frees disk space, removes apps with their leftovers, runs maintenance and shows what your machine is doing.</p>
+          <div class="chips"><span class="chip">Coming soon</span><span class="chip plain">Utilities</span></div>
+          <span class="go">→</span>
+        </a>
+        <a class="card r" style="--accent:#34d399" href="#" data-cursor>
+          <div class="card-top">
+            <img class="icon" src="../src/content/apps/photorelay/icon.png" alt="" />
+            <div><h3>PhotoRelay</h3><span class="tag">Photos, onto what you trust</span></div>
+          </div>
+          <p>Wireless photo and video transfer from your phone to computers, NAS boxes and cloud storage, with no middleman service.</p>
+          <div class="chips"><span class="chip">Coming soon</span><span class="chip plain">Photography</span></div>
+          <span class="go">→</span>
+        </a>
+        <a class="card r" style="--accent:#6366f1" href="#" data-cursor>
+          <div class="card-top">
+            <div class="icon" style="display:grid;place-items:center;font-size:30px;font-weight:600;color:#fff;background:linear-gradient(140deg,#6366f1,#2b2d8a)">D</div>
+            <div><h3>DocScanner</h3><span class="tag">Scan to PDF, offline</span></div>
+          </div>
+          <p>A document scanner that saves straight to PDF, keeps every scan on your device, and has no account, cloud or ads.</p>
+          <div class="chips"><span class="chip">Coming soon</span><span class="chip plain">Productivity</span></div>
+          <span class="go">→</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="showcase">
+    <div class="fade-l"></div><div class="fade-r"></div>
+    <div class="rail" id="rail">
+      <img src="../src/content/apps/tidymac/screenshots/01-clean.webp" alt="" />
+      <img src="../src/content/apps/framely/screenshots/01-frame.png" alt="" />
+      <img src="../src/content/apps/tidymac/screenshots/04-analyze.webp" alt="" />
+      <img src="../src/content/apps/photorelay/screenshots/01-mac-home.webp" alt="" />
+      <img src="../src/content/apps/framely/screenshots/04-backdrops.png" alt="" />
+      <img src="../src/content/apps/tidymac/screenshots/05-status.webp" alt="" />
+      <img src="../src/content/apps/photorelay/screenshots/06-phone-receive.webp" alt="" />
+    </div>
+  </section>
+
+  <section class="block" id="values">
+    <div class="wrap">
+      <div class="section-head r"><h2>How these apps work</h2></div>
+      <div class="values">
+        <div class="value r"><div class="num" data-count="1">01</div><h3>On your device</h3><p>Your files stay where they are. No uploads, no servers holding your data.</p></div>
+        <div class="value r"><div class="num" data-count="2">02</div><h3>No account</h3><p>Open the app and use it. Nothing to sign up for, nothing to remember.</p></div>
+        <div class="value r"><div class="num" data-count="3">03</div><h3>No ads, no tracking</h3><p>No advertising libraries and no analytics watching what you do.</p></div>
+        <div class="value r"><div class="num" data-count="4">04</div><h3>Built to last</h3><p>One job each, done properly, and kept working as the platforms change.</p></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer id="contact">
+  <div class="wrap">
+    <div class="foot">
+      <p>© 2026 Abdullah Emroze · Dhaka, Bangladesh</p>
+      <p><a href="mailto:emrozeae@gmail.com" data-cursor>emrozeae@gmail.com</a></p>
+    </div>
+    <button class="wordmark" id="wordmark" aria-label="Back to top" data-cursor>
+      <svg class="wm-mark" viewBox="0 0 48 48" aria-hidden="true">
+        <defs><linearGradient id="wg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#34D399"/><stop offset="1" stop-color="#6366F1"/>
+        </linearGradient></defs>
+        <rect width="48" height="48" rx="12" fill="url(#wg)"/>
+        <path d="M24 11a13 13 0 1 0 13 13" stroke="#fff" stroke-width="3.6" fill="none" stroke-linecap="round"/>
+        <circle cx="24" cy="24" r="2.6" fill="#fff" fill-opacity=".8"/>
+        <g class="orbit trail"><circle cx="34" cy="14" r="4.2" fill="#fff"/></g>
+        <g class="orbit"><circle cx="34" cy="14" r="4.2" fill="#fff"/></g>
+      </svg>
+      <span class="wm-text" id="wmtext">emroze.dev</span>
+      <span class="wm-hint">back to top ↑</span>
+    </button>
+  </div>
+</footer>
+
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.module.js",
+               "lenis": "https://cdn.jsdelivr.net/npm/lenis@1.3.26/dist/lenis.mjs" } }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import Lenis from 'lenis';
+
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const lerp = (a, b, t) => a + (b - a) * t;
+
+/* ───────────────────────────────────────────────────────────────
+   Shared pointer + scroll state. Everything animated reads this,
+   so there is one source of truth and one rAF loop.
+   ─────────────────────────────────────────────────────────────── */
+const M = {
+  x: innerWidth / 2, y: innerHeight / 2,   // raw pointer
+  px: innerWidth / 2, py: innerHeight / 2, // pointer last frame
+  sx: innerWidth / 2, sy: innerHeight / 2, // smoothed pointer
+  down: false, scroll: 0, velocity: 0,
+};
+
+addEventListener('pointermove', (e) => { M.x = e.clientX; M.y = e.clientY; }, { passive: true });
+addEventListener('pointerdown', () => { M.down = true; ring.classList.add('press'); });
+addEventListener('pointerup', () => { M.down = false; ring.classList.remove('press'); });
+
+/* ───────────────────────────────────────────────────────────────
+   Smooth scrolling. Lenis drives scroll, and its velocity feeds
+   the marquee, the shader and the card skew.
+   ─────────────────────────────────────────────────────────────── */
+let lenis = null;
+if (!reduced) {
+  lenis = new Lenis({ duration: 1.1, smoothWheel: true, lerp: 0.09 });
+  lenis.on('scroll', ({ scroll, velocity }) => { M.scroll = scroll; M.velocity = velocity; });
+}
+
+/* ───────────────────────────────────────────────────────────────
+   WebGL background: a flowing aurora written as a fragment shader,
+   plus a drifting particle field that pushes away from the cursor.
+   ─────────────────────────────────────────────────────────────── */
+let three = null;
+if (!reduced) three = initGL();
+
+function initGL() {
+  const canvas = document.getElementById('gl');
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
+  renderer.setSize(innerWidth, innerHeight);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 0.1, 200);
+  camera.position.set(0, 0, 26);
+
+  /* ── the network ───────────────────────────────────────────────
+     Nodes sit on a grid that ripples like water. Neighbours are
+     joined, and a link fades out as the wave pulls its ends apart,
+     so the mesh keeps breaking and healing instead of sitting still.
+     ───────────────────────────────────────────────────────────── */
+  const small = innerWidth < 760;
+  const COLS = small ? 16 : 26;
+  const ROWS = small ? 11 : 15;
+  const GAP = 2.5;
+  const N = COLS * ROWS;
+
+  const home = new Float32Array(N * 3);   // rest position
+  const node = new Float32Array(N * 3);   // live position
+  const nodeSize = new Float32Array(N);
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const i = r * COLS + c, i3 = i * 3;
+      home[i3] = (c - (COLS - 1) / 2) * GAP;
+      home[i3 + 1] = (r - (ROWS - 1) / 2) * GAP;
+      home[i3 + 2] = 0;
+      nodeSize[i] = Math.random() * 1.6 + 1.1;
+    }
+  }
+  node.set(home);
+
+  const nodeGeo = new THREE.BufferGeometry();
+  nodeGeo.setAttribute('position', new THREE.BufferAttribute(node, 3));
+  nodeGeo.setAttribute('aSize', new THREE.BufferAttribute(nodeSize, 1));
+  const nodeMat = new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    uniforms: { uColor: { value: new THREE.Color('#5ff0bb') }, uOpacity: { value: 0.85 } },
+    vertexShader: `
+      attribute float aSize; varying float vFade;
+      void main() {
+        vec4 mv = modelViewMatrix * vec4(position, 1.0);
+        vFade = clamp(1.0 - abs(position.z) * 0.06, 0.35, 1.0);
+        gl_PointSize = aSize * (150.0 / -mv.z) * (0.75 + abs(position.z) * 0.10);
+        gl_Position = projectionMatrix * mv;
+      }`,
+    fragmentShader: `
+      uniform vec3 uColor; uniform float uOpacity; varying float vFade;
+      void main() {
+        float d = length(gl_PointCoord - 0.5);
+        float a = smoothstep(0.5, 0.05, d);
+        gl_FragColor = vec4(uColor, a * a * uOpacity * vFade);
+      }`,
+  });
+  scene.add(new THREE.Points(nodeGeo, nodeMat));
+
+  // Links: every node joins the one to its right and the one below.
+  const pairs = [];
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const i = r * COLS + c;
+      if (c < COLS - 1) pairs.push(i, i + 1);
+      if (r < ROWS - 1) pairs.push(i, i + COLS);
+    }
+  }
+  const linkPos = new Float32Array(pairs.length * 3);
+  const linkAlpha = new Float32Array(pairs.length);
+  const linkGeo = new THREE.BufferGeometry();
+  linkGeo.setAttribute('position', new THREE.BufferAttribute(linkPos, 3));
+  linkGeo.setAttribute('aAlpha', new THREE.BufferAttribute(linkAlpha, 1));
+  const linkMat = new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    uniforms: { uColor: { value: new THREE.Color('#1fc98a') }, uOpacity: { value: 0.5 } },
+    vertexShader: `
+      attribute float aAlpha; varying float vA;
+      void main() { vA = aAlpha; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+    fragmentShader: `
+      uniform vec3 uColor; uniform float uOpacity; varying float vA;
+      void main() { gl_FragColor = vec4(uColor, vA * uOpacity); }`,
+  });
+  scene.add(new THREE.LineSegments(linkGeo, linkMat));
+
+  /* ── sparkles ──────────────────────────────────────────────────
+     A pool drawn in screen pixels, so a sparkle lands exactly under
+     the pointer. Moving fast spends more of the pool at once.
+     ───────────────────────────────────────────────────────────── */
+  const SPARKS = 220;
+  const sparkScene = new THREE.Scene();
+  const sparkCam = new THREE.OrthographicCamera(0, innerWidth, 0, innerHeight, -1, 1);
+  const sPos = new Float32Array(SPARKS * 3);
+  const sLife = new Float32Array(SPARKS);        // 1 = fresh, 0 = spent
+  const sSeed = new Float32Array(SPARKS);
+  const sVel = new Float32Array(SPARKS * 2);
+  const sHue = new Float32Array(SPARKS);
+  for (let i = 0; i < SPARKS; i++) { sPos[i * 3 + 2] = 0; sSeed[i] = Math.random() * 6.28; }
+  const sparkGeo = new THREE.BufferGeometry();
+  sparkGeo.setAttribute('position', new THREE.BufferAttribute(sPos, 3));
+  sparkGeo.setAttribute('aLife', new THREE.BufferAttribute(sLife, 1));
+  sparkGeo.setAttribute('aSeed', new THREE.BufferAttribute(sSeed, 1));
+  sparkGeo.setAttribute('aHue', new THREE.BufferAttribute(sHue, 1));
+  const sparkMat = new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    uniforms: { uTime: { value: 0 }, uA: { value: new THREE.Color('#9dffd8') }, uB: { value: new THREE.Color('#8ab6ff') } },
+    vertexShader: `
+      attribute float aLife; attribute float aSeed; attribute float aHue;
+      varying float vLife; varying float vSeed; varying float vHue;
+      void main() {
+        vLife = aLife; vSeed = aSeed; vHue = aHue;
+        gl_PointSize = (2.0 + 16.0 * aLife * aLife) * (aLife > 0.0 ? 1.0 : 0.0);
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }`,
+    fragmentShader: `
+      uniform float uTime; uniform vec3 uA, uB;
+      varying float vLife; varying float vSeed; varying float vHue;
+      void main() {
+        vec2 p = gl_PointCoord - 0.5;
+        // Four-point star: a round core with thin cross flares.
+        float core = smoothstep(0.42, 0.0, length(p));
+        float flare = smoothstep(0.5, 0.0, abs(p.x) * 7.0 + abs(p.y) * 0.6)
+                    + smoothstep(0.5, 0.0, abs(p.y) * 7.0 + abs(p.x) * 0.6);
+        float tw = 0.65 + 0.35 * sin(uTime * 9.0 + vSeed);
+        float a = (core + flare * 0.55) * vLife * tw;
+        gl_FragColor = vec4(mix(uA, uB, vHue), a);
+      }`,
+  });
+  sparkScene.add(new THREE.Points(sparkGeo, sparkMat));
+
+  addEventListener('resize', () => {
+    renderer.setSize(innerWidth, innerHeight);
+    camera.aspect = innerWidth / innerHeight;
+    camera.updateProjectionMatrix();
+    sparkCam.right = innerWidth; sparkCam.bottom = innerHeight;
+    sparkCam.updateProjectionMatrix();
+  });
+
+  return {
+    renderer, scene, camera, sparkScene, sparkCam,
+    home, node, nodeGeo, nodeMat, N, COLS, ROWS,
+    pairs, linkPos, linkAlpha, linkGeo, linkMat,
+    SPARKS, sPos, sLife, sSeed, sVel, sHue, sparkGeo, sparkMat,
+    cursor: new THREE.Vector3(), ripples: [],
+  };
+}
+
+/* A click drops a ripple that travels out through the network. */
+addEventListener('pointerdown', () => {
+  if (!three) return;
+  three.ripples.push({ x: three.cursor.x, y: three.cursor.y, t: 0 });
+  if (three.ripples.length > 5) three.ripples.shift();
+});
+
+/* ───────────────────────────────────────────────────────────────
+   Cursor: a dot that tracks exactly, and a ring that lags behind.
+   ─────────────────────────────────────────────────────────────── */
+const cur = document.getElementById('cur');
+const ring = document.getElementById('ring');
+let rx = M.x, ry = M.y;
+for (const el of document.querySelectorAll('[data-cursor]')) {
+  el.addEventListener('pointerenter', () => ring.classList.add('hot'));
+  el.addEventListener('pointerleave', () => ring.classList.remove('hot'));
+}
+
+/* Magnetic buttons lean toward the pointer when it comes close. */
+const magnets = [...document.querySelectorAll('.magnetic')];
+
+/* Cards: scale, tilt, spotlight and glare, all from the pointer. The card
+   under the cursor also grows while the page is scrolling, which a plain
+   hover rule cannot do because scrolling fires no pointer events. */
+const cards = [...document.querySelectorAll('.card')];
+let hotCard = null;
+
+function shapeCard(card, clientX, clientY) {
+  const r = card.getBoundingClientRect();
+  const x = clientX - r.left, y = clientY - r.top;
+  card.style.setProperty('--spot-x', x + 'px');
+  card.style.setProperty('--spot-y', y + 'px');
+  const rX = ((y / r.height) - 0.5) * -6, rY = ((x / r.width) - 0.5) * 8;
+  card.style.transform = `perspective(1000px) rotateX(${rX}deg) rotateY(${rY}deg) translateY(-6px) scale(1.035)`;
+}
+
+function clearCard(card) { if (card) card.style.transform = ''; }
+
+for (const card of cards) {
+  card.addEventListener('pointermove', (e) => {
+    if (hotCard && hotCard !== card) clearCard(hotCard);
+    hotCard = card;
+    shapeCard(card, e.clientX, e.clientY);
+  });
+  card.addEventListener('pointerleave', () => { clearCard(card); if (hotCard === card) hotCard = null; });
+}
+
+/* Called from the loop while the page moves, so the card that slides under
+   the cursor picks the effect up and the one that leaves drops it. */
+function refreshHotCard() {
+  const el = document.elementFromPoint(M.x, M.y);
+  const card = el && el.closest ? el.closest('.card') : null;
+  if (card !== hotCard) { clearCard(hotCard); hotCard = card; }
+  if (card) shapeCard(card, M.x, M.y);
+}
+
+/* ───────────────────────────────────────────────────────────────
+   Headline split into characters, then revealed in sequence.
+   ─────────────────────────────────────────────────────────────── */
+let splitIndex = 0;
+function splitInto(target, text) {
+  for (const w of text.split(/(\s+)/)) {
+    if (!w) continue;
+    if (/^\s+$/.test(w)) { target.appendChild(document.createTextNode(' ')); continue; }
+    const word = document.createElement('span');
+    word.className = 'word';
+    for (const ch of w) {
+      const s = document.createElement('span');
+      s.className = 'char';
+      s.textContent = ch;
+      if (!reduced) {
+        const d = splitIndex * 0.022;
+        s.style.opacity = '0';
+        s.style.transform = 'translateY(0.7em) rotateX(-40deg)';
+        s.style.filter = 'blur(6px)';
+        s.style.transition = `opacity .7s var(--ease-out) ${d}s, transform .9s var(--ease-out) ${d}s, filter .7s ${d}s`;
+      }
+      word.appendChild(s);
+      splitIndex++;
+    }
+    target.appendChild(word);
+  }
+}
+
+// Walks the heading so inline markup, like the italic accent word, survives.
+for (const node of document.querySelectorAll('[data-split]')) {
+  const source = [...node.childNodes];
+  node.textContent = '';
+  for (const child of source) {
+    if (child.nodeType === Node.TEXT_NODE) {
+      splitInto(node, child.textContent);
+    } else {
+      const clone = child.cloneNode(false);
+      splitInto(clone, child.textContent);
+      node.appendChild(clone);
+    }
+  }
+}
+requestAnimationFrame(() => {
+  for (const s of document.querySelectorAll('.char')) {
+    s.style.opacity = '1'; s.style.transform = 'none'; s.style.filter = 'none';
+  }
+});
+
+/* ───────────────────────────────────────────────────────────────
+   Scroll reveals, with a stagger inside each group.
+   ─────────────────────────────────────────────────────────────── */
+const io = new IntersectionObserver((entries) => {
+  for (const en of entries) {
+    if (!en.isIntersecting) continue;
+    const sibs = [...en.target.parentElement.children].filter((c) => c.classList.contains('r'));
+    en.target.style.transitionDelay = `${Math.max(0, sibs.indexOf(en.target)) * 0.08}s`;
+    en.target.classList.add('in');
+    io.unobserve(en.target);
+    const num = en.target.querySelector('[data-count]');
+    if (num) countUp(num);
+  }
+}, { rootMargin: '0px 0px -10% 0px', threshold: 0.15 });
+for (const el of document.querySelectorAll('.r')) io.observe(el);
+
+function countUp(el) {
+  const target = +el.dataset.count;
+  let v = 0;
+  const step = () => {
+    v = Math.min(target, v + 0.08);
+    el.textContent = String(Math.round(v)).padStart(2, '0');
+    if (v < target) requestAnimationFrame(step);
+  };
+  step();
+}
+
+/* ───────────────────────────────────────────────────────────────
+   Marquee. Base speed plus whatever the scroll is doing.
+   ─────────────────────────────────────────────────────────────── */
+const rail = document.getElementById('rail');
+rail.innerHTML += rail.innerHTML;
+let railX = 0, railHalf = 0;
+const measure = () => { railHalf = rail.scrollWidth / 2; };
+addEventListener('load', measure); addEventListener('resize', measure); measure();
+
+/* Header, progress bar and footer parallax. */
+const head = document.getElementById('head');
+const prog = document.getElementById('prog');
+
+
+/* ───────────────────────────────────────────────────────────────
+   One loop for everything.
+   ─────────────────────────────────────────────────────────────── */
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000);
+  last = now;
+  lenis?.raf(now);
+
+  // Smoothed pointer, used by the cursor, the shader and the particles.
+  M.sx = lerp(M.sx, M.x, 0.12);
+  M.sy = lerp(M.sy, M.y, 0.12);
+  rx = lerp(rx, M.x, 0.16);
+  ry = lerp(ry, M.y, 0.16);
+  cur.style.transform = `translate(${M.x}px, ${M.y}px)`;
+  ring.style.transform = `translate(${rx}px, ${ry}px)`;
+
+  // Magnetic buttons.
+  for (const el of magnets) {
+    const r = el.getBoundingClientRect();
+    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    const dx = M.x - cx, dy = M.y - cy;
+    const dist = Math.hypot(dx, dy);
+    const reach = Math.max(r.width, 180);
+    const k = dist < reach ? (1 - dist / reach) * 0.35 : 0;
+    el.style.transform = `translate(${dx * k}px, ${dy * k}px)`;
+  }
+
+  // While the page is moving, re-test what sits under the cursor.
+  if (Math.abs(M.velocity) > 0.03) refreshHotCard();
+
+  // Scroll-derived bits.
+  const y = lenis ? M.scroll : scrollY;
+  const max = document.documentElement.scrollHeight - innerHeight;
+  prog.style.transform = `scaleX(${max > 0 ? y / max : 0})`;
+  head.classList.toggle('stuck', y > 14);
+  // Letters near the cursor rise; the rest settle back down.
+  for (const c of wmChars) {
+    const r = c.el.getBoundingClientRect();
+    if (r.bottom < -80 || r.top > innerHeight + 80) { c.y = lerp(c.y, 0, 0.1); c.el.style.transform = ''; continue; }
+    const dx = M.x - (r.left + r.width / 2), dy = M.y - (r.top + r.height / 2);
+    const d = Math.hypot(dx, dy);
+    const fall = d < 190 ? (1 - d / 190) * (1 - d / 190) : 0;
+    const target = -fall * 26;
+    c.y = lerp(c.y, target, 0.14);
+    c.el.style.transform = `translateY(${c.y.toFixed(2)}px)`;
+    if (wmWidth) {
+      const phase = ((now / 26) % wmWidth);
+      c.el.style.backgroundPosition = `${phase - c.offset}px 0`;
+    }
+  }
+
+  // Marquee drifts, and scrolling nudges it along.
+  railX -= (28 + Math.abs(M.velocity) * 12) * dt;
+  if (railHalf && -railX >= railHalf) railX += railHalf;
+  rail.style.transform = `translateX(${railX}px)`;
+  M.velocity = lerp(M.velocity, 0, 0.08);
+
+  // WebGL.
+  if (three) {
+    const t = now / 1000;
+    const {
+      renderer, scene, camera, sparkScene, sparkCam,
+      home, node, nodeGeo, N, COLS, ROWS,
+      pairs, linkPos, linkAlpha, linkGeo,
+      SPARKS, sPos, sLife, sSeed, sVel, sHue, sparkGeo, sparkMat, ripples,
+    } = three;
+
+    // Pointer in world units on the z = 0 plane, so the network and the
+    // sparkles agree on where the cursor is.
+    const fov = (camera.fov * Math.PI) / 180;
+    const hH = Math.tan(fov / 2) * camera.position.z;
+    const hW = hH * camera.aspect;
+    three.cursor.set((M.sx / innerWidth - 0.5) * 2 * hW, -(M.sy / innerHeight - 0.5) * 2 * hH, 0);
+    const cx = three.cursor.x, cy = three.cursor.y;
+
+    for (const r of ripples) r.t += dt;
+    while (ripples.length && ripples[0].t > 2.6) ripples.shift();
+
+    // Nodes: two crossing waves, a swell that follows the pointer, and
+    // any ripples still travelling.
+    for (let i = 0; i < N; i++) {
+      const i3 = i * 3;
+      const hx = home[i3], hy = home[i3 + 1];
+      let z = Math.sin(hx * 0.32 + t * 0.9) * 1.25 + Math.cos(hy * 0.38 - t * 0.7) * 1.05;
+      z += Math.sin((hx + hy) * 0.2 + t * 0.45) * 0.7;
+
+      const dx = hx - cx, dy = hy - cy;
+      const d = Math.hypot(dx, dy);
+      const swell = Math.exp(-d * d / 40) * 3.4;             // lifts toward the cursor
+      z += swell;
+
+      for (const r of ripples) {
+        const rd = Math.hypot(hx - r.x, hy - r.y);
+        const front = r.t * 11;
+        z += Math.cos((rd - front) * 0.9) * Math.exp(-Math.abs(rd - front) * 0.45) * Math.exp(-r.t * 1.1) * 3.2;
+      }
+
+      // A little in-plane drift away from the pointer keeps it alive.
+      const spread = d < 7 ? (7 - d) * 0.07 : 0;
+      node[i3] = lerp(node[i3], hx + (dx / (d || 1)) * spread, 0.12);
+      node[i3 + 1] = lerp(node[i3 + 1], hy + (dy / (d || 1)) * spread, 0.12);
+      node[i3 + 2] = lerp(node[i3 + 2], z, 0.16);
+    }
+    nodeGeo.attributes.position.needsUpdate = true;
+
+    // Links follow their nodes and fade as they stretch.
+    for (let k = 0; k < pairs.length; k += 2) {
+      const a = pairs[k] * 3, b = pairs[k + 1] * 3;
+      linkPos[k * 3] = node[a]; linkPos[k * 3 + 1] = node[a + 1]; linkPos[k * 3 + 2] = node[a + 2];
+      linkPos[k * 3 + 3] = node[b]; linkPos[k * 3 + 4] = node[b + 1]; linkPos[k * 3 + 5] = node[b + 2];
+      const len = Math.hypot(node[a] - node[b], node[a + 1] - node[b + 1], node[a + 2] - node[b + 2]);
+      const strain = Math.max(0, 1 - (len - 2.5) * 0.55);
+      const mx = (node[a] - cx + node[b] - cx) / 2, my = (node[a + 1] - cy + node[b + 1] - cy) / 2;
+      const near = Math.exp(-(mx * mx + my * my) / 70);
+      const v = Math.min(1, strain * (0.22 + near * 1.5));
+      linkAlpha[k] = v; linkAlpha[k + 1] = v;
+    }
+    linkGeo.attributes.position.needsUpdate = true;
+    linkGeo.attributes.aAlpha.needsUpdate = true;
+
+    // Sparkles: spawn along the path the pointer just travelled.
+    const moved = Math.hypot(M.x - M.px, M.y - M.py);
+    M.px = M.x; M.py = M.y;
+    let budget = Math.min(6, Math.round(moved / 9)) + (M.down ? 3 : 0);
+    for (let i = 0; i < SPARKS && budget > 0; i++) {
+      if (sLife[i] > 0) continue;
+      const f = Math.random();
+      sPos[i * 3] = M.px + (Math.random() - 0.5) * 16 - (M.x - M.sx) * f * 0.3;
+      sPos[i * 3 + 1] = M.py + (Math.random() - 0.5) * 16 - (M.y - M.sy) * f * 0.3;
+      sVel[i * 2] = (Math.random() - 0.5) * 34;
+      sVel[i * 2 + 1] = (Math.random() - 0.5) * 34 - 12;
+      sLife[i] = 1;
+      sSeed[i] = Math.random() * 6.28;
+      sHue[i] = Math.random();
+      budget--;
+    }
+    for (let i = 0; i < SPARKS; i++) {
+      if (sLife[i] <= 0) continue;
+      sLife[i] = Math.max(0, sLife[i] - dt * 1.25);
+      sVel[i * 2 + 1] += 26 * dt;                  // gentle fall
+      sPos[i * 3] += sVel[i * 2] * dt;
+      sPos[i * 3 + 1] += sVel[i * 2 + 1] * dt;
+    }
+    sparkGeo.attributes.position.needsUpdate = true;
+    sparkGeo.attributes.aLife.needsUpdate = true;
+    sparkGeo.attributes.aSeed.needsUpdate = true;
+    sparkGeo.attributes.aHue.needsUpdate = true;
+    sparkMat.uniforms.uTime.value = t;
+
+    // The whole field leans with the pointer and drifts with the page.
+    scene.rotation.x = lerp(scene.rotation.x, -(M.sy / innerHeight - 0.5) * 0.30 + 0.12, 0.05);
+    scene.rotation.y = lerp(scene.rotation.y, (M.sx / innerWidth - 0.5) * 0.36, 0.05);
+    scene.position.y = lerp(scene.position.y, (y / innerHeight) * 2.2, 0.06);
+
+    renderer.render(scene, camera);
+    renderer.autoClear = false;
+    renderer.render(sparkScene, sparkCam);
+    renderer.autoClear = true;
+  }
+
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+// Nothing to draw while the tab is in the background.
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) { last = performance.now(); }
+});
+
+/* Theme switch also retunes the WebGL layer. */
+document.getElementById('theme').addEventListener('click', () => {
+  const root = document.documentElement;
+  const dark = root.dataset.theme !== 'dark';
+  root.dataset.theme = dark ? 'dark' : 'light';
+  if (three) {
+    three.nodeMat.uniforms.uColor.value.set(dark ? '#5ff0bb' : '#0f9c6c');
+    three.nodeMat.uniforms.uOpacity.value = dark ? 0.85 : 0.5;
+    three.linkMat.uniforms.uColor.value.set(dark ? '#1fc98a' : '#0f9c6c');
+    three.linkMat.uniforms.uOpacity.value = dark ? 0.5 : 0.3;
+    three.sparkMat.uniforms.uA.value.set(dark ? '#9dffd8' : '#12b981');
+    three.sparkMat.uniforms.uB.value.set(dark ? '#8ab6ff' : '#4f46e5');
+  }
+});
+
+/* Footer wordmark: split into letters, each lifting as the cursor nears it. */
+const wmText = document.getElementById('wmtext');
+const wmChars = [];
+if (wmText) {
+  const text = wmText.textContent;
+  wmText.textContent = '';
+  for (const ch of text) {
+    const el = document.createElement('span');
+    el.className = 'wm-char';
+    el.textContent = ch;
+    wmText.appendChild(el);
+    wmChars.push({ el, y: 0 });
+  }
+}
+function sliceWordmark() {
+  if (!wmText) return;
+  const total = wmText.getBoundingClientRect().width;
+  const base = wmText.getBoundingClientRect().left;
+  for (const c of wmChars) {
+    const r = c.el.getBoundingClientRect();
+    c.el.style.backgroundSize = `${total}px 100%`;
+    c.offset = r.left - base;
+    c.el.style.backgroundPosition = `${-c.offset}px 0`;
+  }
+  wmWidth = total;
+}
+let wmWidth = 0;
+addEventListener('resize', sliceWordmark);
+(document.fonts ? document.fonts.ready : Promise.resolve()).then(sliceWordmark);
+sliceWordmark();
+
+document.getElementById('wordmark')?.addEventListener('click', () => {
+  lenis ? lenis.scrollTo(0, { duration: 1.4 }) : scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+/* Anchor links go through Lenis so the scroll stays smooth. */
+for (const a of document.querySelectorAll('a[href^="#"]')) {
+  a.addEventListener('click', (e) => {
+    const el = document.querySelector(a.getAttribute('href'));
+    if (!el) return;
+    e.preventDefault();
+    lenis ? lenis.scrollTo(el, { offset: -70 }) : el.scrollIntoView({ behavior: 'smooth' });
+  });
+}
+</script>
+</body>
+</html>

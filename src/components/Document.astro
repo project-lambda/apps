@@ -20,20 +20,21 @@ const { effectiveDate, updated } = entry.data;
   title={`${heading} · ${app.data.name}`}
   description={`${heading} for ${app.data.name}.`}
   accent={app.data.accent}
+  calm
 >
   <AppNav app={app} current={kind} hasTerms={hasTerms} />
   <article class="wrap narrow doc">
-    <h1>{app.data.name} {heading}</h1>
-    <p class="muted dates">
+    <h1 class="r">{app.data.name} {heading}</h1>
+    <p class="muted dates r">
       Effective {formatDate(effectiveDate)}
       {updated && <> · Last updated {formatDate(updated)}</>}
     </p>
-    <div class="prose"><slot /></div>
+    <div class="prose r"><slot /></div>
   </article>
 </Base>
 
 <style>
-  .doc { padding-top: 48px; }
-  .doc h1 { font-size: clamp(1.8rem, 4vw, 2.4rem); }
-  .dates { margin: 0 0 32px; }
+  .doc { padding-top: 56px; }
+  .doc h1 { font-size: clamp(1.9rem, 4.2vw, 2.6rem); }
+  .dates { margin: 0 0 30px; }
 </style>

@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mockup · emroze.dev</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+<style>
+/* ─────────────────────────────────────────────────────────────
+   Tokens
+   ───────────────────────────────────────────────────────────── */
+@property --spot-x { syntax: '<length>'; initial-value: 50%; inherits: false; }
+@property --spot-y { syntax: '<length>'; initial-value: 50%; inherits: false; }
+@property --sweep { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+
+:root {
+  --bg: #08090c;
+  --surface: #101218;
+  --surface-2: #161922;
+  --ink: #f2f4f8;
+  --muted: #9aa2b1;
+  --line: #22262f;
+  --accent: #1fc98a;
+  --accent-ink: color-mix(in oklab, var(--accent) 78%, white);
+  --radius: 22px;
+  --ease: cubic-bezier(.22,.61,.36,1);
+  --ease-out: cubic-bezier(.16,1,.3,1);
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: 'cv11', 'ss01';
+  color-scheme: dark;
+}
+
+:root[data-theme='light'] {
+  --bg: #fbfbfa;
+  --surface: #ffffff;
+  --surface-2: #f4f5f3;
+  --ink: #14161b;
+  --muted: #5d636e;
+  --line: #e6e7e3;
+  --accent-ink: color-mix(in oklab, var(--accent) 62%, black);
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+img { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+h1, h2, h3 { line-height: 1.05; letter-spacing: -0.035em; margin: 0; font-weight: 600; }
+.wrap { width: min(1120px, 100% - 44px); margin-inline: auto; }
+.serif { font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -0.01em; }
+.muted { color: var(--muted); }
+
+/* ─────────────────────────────────────────────────────────────
+   Scroll progress + header
+   ───────────────────────────────────────────────────────────── */
+.progress {
+  position: fixed; inset: 0 0 auto 0; height: 2px; z-index: 60;
+  background: linear-gradient(90deg, var(--accent), color-mix(in oklab, var(--accent) 40%, #7c5cff));
+  transform-origin: 0 50%; transform: scaleX(0);
+  animation: grow linear both;
+  animation-timeline: scroll(root block);
+}
+@keyframes grow { to { transform: scaleX(1); } }
+
+header {
+  position: sticky; top: 0; z-index: 50;
+  backdrop-filter: blur(14px) saturate(140%);
+  background: color-mix(in oklab, var(--bg) 72%, transparent);
+  border-bottom: 1px solid transparent;
+  transition: border-color .4s var(--ease), background .4s var(--ease);
+}
+header.stuck { border-bottom-color: var(--line); }
+.bar { display: flex; align-items: center; justify-content: space-between; height: 68px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 600; letter-spacing: -0.02em; }
+.brand .dot {
+  width: 22px; height: 22px; border-radius: 7px;
+  background: conic-gradient(from var(--sweep), var(--accent), #7c5cff, #1fc98a);
+  animation: sweep 6s linear infinite;
+}
+@keyframes sweep { to { --sweep: 360deg; } }
+nav { display: flex; gap: 6px; align-items: center; }
+nav a {
+  position: relative; padding: 8px 14px; border-radius: 999px; color: var(--muted);
+  font-size: .95rem; font-weight: 500; transition: color .25s var(--ease);
+}
+nav a::before {
+  content: ''; position: absolute; inset: 0; border-radius: inherit;
+  background: var(--surface-2); opacity: 0; transform: scale(.85);
+  transition: opacity .25s var(--ease), transform .35s var(--ease-out); z-index: -1;
+}
+nav a:hover { color: var(--ink); }
+nav a:hover::before { opacity: 1; transform: scale(1); }
+.theme-toggle {
+  display: grid; place-items: center; width: 36px; height: 36px; margin-left: 6px;
+  border: 1px solid var(--line); border-radius: 12px; background: var(--surface);
+  color: var(--muted); cursor: pointer; transition: transform .3s var(--ease-out), color .25s;
+}
+.theme-toggle:hover { transform: rotate(-12deg) scale(1.06); color: var(--ink); }
+
+/* ─────────────────────────────────────────────────────────────
+   Hero
+   ───────────────────────────────────────────────────────────── */
+.hero { position: relative; padding: clamp(80px, 13vw, 170px) 0 90px; overflow: hidden; }
+.aurora { position: absolute; inset: -30% -10% auto; height: 820px; z-index: -2; filter: blur(90px); opacity: .55; }
+.aurora span { position: absolute; border-radius: 50%; mix-blend-mode: screen; }
+.aurora .a { width: 620px; height: 620px; left: 4%; top: 6%; background: #1fc98a; animation: drift1 22s var(--ease) infinite alternate; }
+.aurora .b { width: 520px; height: 520px; left: 46%; top: 0; background: #7c5cff; animation: drift2 26s var(--ease) infinite alternate; }
+.aurora .c { width: 460px; height: 460px; left: 72%; top: 22%; background: #38bdf8; animation: drift3 30s var(--ease) infinite alternate; }
+@keyframes drift1 { to { transform: translate3d(90px, 60px, 0) scale(1.15); } }
+@keyframes drift2 { to { transform: translate3d(-120px, 90px, 0) scale(.9); } }
+@keyframes drift3 { to { transform: translate3d(60px, -70px, 0) scale(1.2); } }
+:root[data-theme='light'] .aurora { opacity: .35; }
+
+.grid-lines {
+  position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 68px 68px;
+  mask-image: radial-gradient(120% 70% at 50% 0%, #000 20%, transparent 72%);
+  opacity: .5;
+}
+
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 9px; padding: 7px 14px 7px 8px;
+  border: 1px solid var(--line); border-radius: 999px; background: color-mix(in oklab, var(--surface) 70%, transparent);
+  font-size: .85rem; color: var(--muted); margin-bottom: 26px;
+}
+.eyebrow b { color: var(--ink); font-weight: 500; }
+.ping { position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); margin-left: 6px; }
+.ping::after {
+  content: ''; position: absolute; inset: -4px; border-radius: 50%;
+  border: 1px solid var(--accent); animation: ping 2.4s var(--ease-out) infinite;
+}
+@keyframes ping { 0% { transform: scale(.6); opacity: .9; } 100% { transform: scale(1.9); opacity: 0; } }
+
+h1.display { font-size: clamp(2.9rem, 8.4vw, 6.2rem); max-width: 16ch; }
+h1.display .line { display: block; overflow: hidden; }
+h1.display .line > span { display: block; animation: rise 1s var(--ease-out) both; }
+h1.display .line:nth-child(2) > span { animation-delay: .1s; }
+h1.display .line:nth-child(3) > span { animation-delay: .2s; }
+@keyframes rise { from { transform: translateY(105%); } }
+
+.lede { font-size: clamp(1.05rem, 1.6vw, 1.3rem); color: var(--muted); max-width: 46ch; margin: 26px 0 34px; animation: fade .9s .45s var(--ease-out) both; }
+@keyframes fade { from { opacity: 0; transform: translateY(14px); } }
+
+.cta-row { display: flex; gap: 12px; flex-wrap: wrap; animation: fade .9s .6s var(--ease-out) both; }
+.btn {
+  position: relative; display: inline-flex; align-items: center; gap: 9px;
+  padding: 14px 22px; border-radius: 14px; font-weight: 500; font-size: .98rem;
+  background: var(--ink); color: var(--bg); overflow: hidden;
+  transition: transform .35s var(--ease-out), box-shadow .35s var(--ease);
+}
+.btn:hover { transform: translateY(-2px); box-shadow: 0 14px 34px color-mix(in oklab, var(--accent) 22%, transparent); }
+.btn::after {
+  content: ''; position: absolute; inset: 0; translate: -120% 0;
+  background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--accent) 60%, white), transparent);
+  opacity: .6; transition: translate .7s var(--ease);
+}
+.btn:hover::after { translate: 120% 0; }
+.btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+.btn.ghost:hover { border-color: color-mix(in oklab, var(--accent) 50%, var(--line)); }
+.arrow { transition: transform .35s var(--ease-out); }
+.btn:hover .arrow { transform: translateX(4px); }
+
+/* ─────────────────────────────────────────────────────────────
+   Reveal on scroll
+   ───────────────────────────────────────────────────────────── */
+.reveal { animation: revealIn .9s var(--ease-out) both; animation-timeline: view(); animation-range: entry 8% cover 28%; }
+@keyframes revealIn { from { opacity: 0; transform: translateY(26px) scale(.985); } }
+
+/* ─────────────────────────────────────────────────────────────
+   App cards
+   ───────────────────────────────────────────────────────────── */
+.section-head { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin: 96px 0 26px; }
+.section-head h2 { font-size: clamp(1.7rem, 3.4vw, 2.6rem); }
+.count { font-variant-numeric: tabular-nums; color: var(--muted); font-size: .9rem; }
+
+.cards { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr)); }
+.card {
+  position: relative; padding: 26px; border-radius: var(--radius);
+  background: linear-gradient(180deg, var(--surface), color-mix(in oklab, var(--surface) 84%, var(--bg)));
+  border: 1px solid var(--line); overflow: hidden; isolation: isolate;
+  transform-style: preserve-3d;
+  transition: transform .5s var(--ease-out), border-color .4s var(--ease);
+}
+.card::before {
+  content: ''; position: absolute; inset: -1px; border-radius: inherit; z-index: -1;
+  background: radial-gradient(420px circle at var(--spot-x) var(--spot-y), color-mix(in oklab, var(--accent) 34%, transparent), transparent 62%);
+  opacity: 0; transition: opacity .45s var(--ease);
+}
+.card:hover { border-color: color-mix(in oklab, var(--accent) 34%, var(--line)); }
+.card:hover::before { opacity: 1; }
+.card-top { display: flex; align-items: center; gap: 16px; }
+.icon {
+  width: 62px; height: 62px; border-radius: 17px; flex: none;
+  box-shadow: 0 10px 30px color-mix(in oklab, var(--accent) 22%, transparent);
+  transition: transform .5s var(--ease-out);
+}
+.card:hover .icon { transform: translateZ(28px) rotate(-4deg) scale(1.05); }
+.card h3 { font-size: 1.28rem; }
+.tag { font-size: .82rem; color: var(--accent-ink); font-weight: 500; }
+.card p { color: var(--muted); font-size: .96rem; margin: 16px 0 18px; }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip {
+  font-size: .78rem; padding: 5px 11px; border-radius: 999px;
+  background: color-mix(in oklab, var(--accent) 15%, transparent); color: var(--accent-ink);
+}
+.chip.plain { background: var(--surface-2); color: var(--muted); }
+.card .go {
+  position: absolute; right: 22px; bottom: 22px; width: 34px; height: 34px;
+  display: grid; place-items: center; border-radius: 50%; background: var(--surface-2);
+  color: var(--muted); opacity: 0; transform: translateX(-6px);
+  transition: all .4s var(--ease-out);
+}
+.card:hover .go { opacity: 1; transform: none; color: var(--ink); }
+
+/* ─────────────────────────────────────────────────────────────
+   Marquee of screenshots
+   ───────────────────────────────────────────────────────────── */
+.showcase { margin-top: 110px; position: relative; }
+.rail { display: flex; gap: 18px; width: max-content; animation: slide 46s linear infinite; }
+.showcase:hover .rail { animation-play-state: paused; }
+@keyframes slide { to { transform: translateX(-50%); } }
+.rail img {
+  height: 360px; width: auto; border-radius: 16px; border: 1px solid var(--line);
+  transition: transform .5s var(--ease-out), filter .5s var(--ease);
+  filter: saturate(.92);
+}
+.rail img:hover { transform: translateY(-8px) scale(1.02); filter: none; }
+.fade-l, .fade-r { position: absolute; top: 0; bottom: 0; width: 140px; z-index: 2; pointer-events: none; }
+.fade-l { left: 0; background: linear-gradient(90deg, var(--bg), transparent); }
+.fade-r { right: 0; background: linear-gradient(270deg, var(--bg), transparent); }
+
+/* ─────────────────────────────────────────────────────────────
+   Values
+   ───────────────────────────────────────────────────────────── */
+.values { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); margin-top: 26px; }
+.value { padding: 26px; border-radius: 18px; border: 1px solid var(--line); background: var(--surface); }
+.value .num { font-family: 'Instrument Serif', serif; font-size: 2.4rem; color: var(--accent-ink); line-height: 1; }
+.value h3 { font-size: 1.05rem; margin: 12px 0 6px; }
+.value p { margin: 0; color: var(--muted); font-size: .93rem; }
+
+/* ─────────────────────────────────────────────────────────────
+   Footer
+   ───────────────────────────────────────────────────────────── */
+footer { margin-top: 120px; border-top: 1px solid var(--line); padding: 46px 0 60px; }
+.foot { display: flex; justify-content: space-between; gap: 22px; flex-wrap: wrap; color: var(--muted); font-size: .92rem; }
+.foot a { color: var(--accent-ink); }
+.big-mark {
+  font-size: clamp(3rem, 15vw, 11rem); line-height: .9; letter-spacing: -.05em;
+  color: transparent; -webkit-text-stroke: 1px var(--line); margin-top: 40px; user-select: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; }
+  html { scroll-behavior: auto; }
+  .rail { animation: none; }
+}
+</style>
+</head>
+<body>
+<div class="progress"></div>
+
+<header id="head">
+  <div class="wrap bar">
+    <a class="brand" href="#"><span class="dot"></span> Abdullah Emroze</a>
+    <nav>
+      <a href="#apps">Apps</a>
+      <a href="#values">About</a>
+      <a href="#contact">Contact</a>
+      <button class="theme-toggle" id="theme" aria-label="Switch theme">◐</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="aurora"><span class="a"></span><span class="b"></span><span class="c"></span></div>
+    <div class="grid-lines"></div>
+    <div class="wrap">
+      <span class="eyebrow"><b>4 apps</b> in the workshop <i class="ping"></i></span>
+      <h1 class="display">
+        <span class="line"><span>Small tools,</span></span>
+        <span class="line"><span>built with <i class="serif">care</i></span></span>
+        <span class="line"><span>and no tracking.</span></span>
+      </h1>
+      <p class="lede">Apps that do one job well, keep your data on your device, and never ask you to sign in. Made in Dhaka, shipped worldwide.</p>
+      <div class="cta-row">
+        <a class="btn" href="#apps">Browse the apps <span class="arrow">→</span></a>
+        <a class="btn ghost" href="#contact">Get in touch</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap" id="apps">
+    <div class="section-head reveal">
+      <h2>The apps</h2>
+      <span class="count">04 — 2026</span>
+    </div>
+    <div class="cards">
+      <a class="card reveal" style="--accent:#1fc98a" href="#">
+        <div class="card-top">
+          <img class="icon" src="../src/content/apps/framely/icon.png" alt="" />
+          <div><h3>Framely</h3><span class="tag">Store-ready screenshots</span></div>
+        </div>
+        <p>Turn plain app screenshots into polished App Store and Google Play images, with device frames, matched backdrops and captions.</p>
+        <div class="chips"><span class="chip">Coming soon</span><span class="chip plain">Productivity</span></div>
+        <span class="go">→</span>
+      </a>
+      <a class="card reveal" style="--accent:#38bdf8" href="#">
+        <div class="card-top">
+          <img class="icon" src="../src/content/apps/tidymac/icon.png" alt="" />
+          <div><h3>TidyMac</h3><span class="tag">Clean, uninstall, watch</span></div>
+        </div>
+        <p>A native Mac app that frees disk space, removes apps with their leftovers, runs maintenance and shows what your machine is doing.</p>
+        <div class="chips"><span class="chip">Coming soon</span><span class="chip plain">Utilities</span></div>
+        <span class="go">→</span>
+      </a>
+      <a class="card reveal" style="--accent:#34d399" href="#">
+        <div class="card-top">
+          <img class="icon" src="../src/content/apps/photorelay/icon.png" alt="" />
+          <div><h3>PhotoRelay</h3><span class="tag">Photos, onto what you trust</span></div>
+        </div>
+        <p>Wireless photo and video transfer from your phone to computers, NAS boxes and cloud storage, with no middleman service.</p>
+        <div class="chips"><span class="chip">Coming soon</span><span class="chip plain">Photography</span></div>
+        <span class="go">→</span>
+      </a>
+      <a class="card reveal" style="--accent:#6366f1" href="#">
+        <div class="card-top">
+          <div class="icon" style="display:grid;place-items:center;font-size:29px;font-weight:600;color:#fff;background:linear-gradient(140deg,#6366f1,#2b2d8a)">D</div>
+          <div><h3>DocScanner</h3><span class="tag">Scan to PDF, offline</span></div>
+        </div>
+        <p>A document scanner that saves straight to PDF, keeps every scan on your device, and has no account, cloud or ads.</p>
+        <div class="chips"><span class="chip">Coming soon</span><span class="chip plain">Productivity</span></div>
+        <span class="go">→</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="showcase">
+    <div class="fade-l"></div><div class="fade-r"></div>
+    <div class="rail" id="rail">
+      <img src="../src/content/apps/tidymac/screenshots/01-clean.webp" alt="" />
+      <img src="../src/content/apps/framely/screenshots/01-frame.png" alt="" />
+      <img src="../src/content/apps/tidymac/screenshots/04-analyze.webp" alt="" />
+      <img src="../src/content/apps/photorelay/screenshots/01-mac-home.webp" alt="" />
+      <img src="../src/content/apps/framely/screenshots/04-backdrops.png" alt="" />
+      <img src="../src/content/apps/tidymac/screenshots/05-status.webp" alt="" />
+      <img src="../src/content/apps/photorelay/screenshots/06-phone-receive.webp" alt="" />
+    </div>
+  </section>
+
+  <section class="wrap" id="values">
+    <div class="section-head reveal"><h2>How these apps work</h2></div>
+    <div class="values">
+      <div class="value reveal"><div class="num">01</div><h3>On your device</h3><p>Your files stay where they are. No uploads, no servers holding your data.</p></div>
+      <div class="value reveal"><div class="num">02</div><h3>No account</h3><p>Open the app and use it. Nothing to sign up for, nothing to remember.</p></div>
+      <div class="value reveal"><div class="num">03</div><h3>No ads, no tracking</h3><p>No advertising libraries and no analytics watching what you do.</p></div>
+      <div class="value reveal"><div class="num">04</div><h3>Built to last</h3><p>One job each, done properly, and kept working as the platforms change.</p></div>
+    </div>
+  </section>
+</main>
+
+<footer id="contact">
+  <div class="wrap">
+    <div class="foot">
+      <p>© 2026 Abdullah Emroze · Dhaka, Bangladesh</p>
+      <p><a href="mailto:emrozeae@gmail.com">emrozeae@gmail.com</a></p>
+    </div>
+    <div class="big-mark">emroze.dev</div>
+  </div>
+</footer>
+
+<script>
+// Spotlight follows the cursor inside each card, and the card tilts a little.
+for (const card of document.querySelectorAll('.card')) {
+  card.addEventListener('pointermove', (e) => {
+    const r = card.getBoundingClientRect();
+    const x = e.clientX - r.left, y = e.clientY - r.top;
+    card.style.setProperty('--spot-x', x + 'px');
+    card.style.setProperty('--spot-y', y + 'px');
+    const rx = ((y / r.height) - .5) * -5, ry = ((x / r.width) - .5) * 6;
+    card.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) translateY(-3px)`;
+  });
+  card.addEventListener('pointerleave', () => { card.style.transform = ''; });
+}
+
+// Header hairline once the page has moved.
+const head = document.getElementById('head');
+addEventListener('scroll', () => head.classList.toggle('stuck', scrollY > 12), { passive: true });
+
+// Marquee needs a second copy of the strip to loop seamlessly.
+const rail = document.getElementById('rail');
+rail.innerHTML += rail.innerHTML;
+
+// Theme switch, for judging both looks.
+document.getElementById('theme').addEventListener('click', () => {
+  const root = document.documentElement;
+  root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
+});
+
+// Fallback reveal for browsers without scroll-driven animations.
+if (!CSS.supports('animation-timeline: view()')) {
+  const io = new IntersectionObserver((entries) => {
+    for (const en of entries) if (en.isIntersecting) {
+      en.target.style.animation = 'revealIn .9s var(--ease-out) both';
+      io.unobserve(en.target);
+    }
+  }, { rootMargin: '0px 0px -12% 0px' });
+  for (const el of document.querySelectorAll('.reveal')) { el.style.animation = 'none'; io.observe(el); }
+}
+</script>
+</body>
+</html>

@@ -5,9 +5,9 @@ import { href } from '../lib/paths';
 
 <Base title="Page not found" description="This page doesn't exist.">
   <section class="wrap narrow page">
-    <h1>Page not found</h1>
+    <h1 class="r">Page not found</h1>
     <p class="muted">The page you were looking for isn't here.</p>
-    <a class="button" href={href()}>See all apps</a>
+    <a class="button magnetic" href={href()} data-cursor>See all apps <span class="arrow">→</span></a>
   </section>
 </Base>
 
