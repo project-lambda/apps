@@ -34,6 +34,28 @@ const d = app.data;
   </section>
 
   {
+    d.video && (
+      <section class="wrap demo r">
+        <figure>
+          <video
+            class="demo-video"
+            poster={d.video.poster.src}
+            muted
+            loop
+            playsinline
+            controls
+            preload="none"
+            data-demo
+          >
+            <source src={href(d.video.file)} type="video/mp4" />
+          </video>
+          {d.video.caption && <figcaption class="muted">{d.video.caption}</figcaption>}
+        </figure>
+      </section>
+    )
+  }
+
+  {
     d.screenshots.length > 0 && (
       <section class="showcase" aria-label={`${d.name} screenshots`}>
         <button class="nudge prev" type="button" aria-label="Previous screenshots" data-shots-prev>‹</button>
@@ -86,6 +108,14 @@ const d = app.data;
   .icon-wrap :global(.app-icon) { box-shadow: 0 18px 50px color-mix(in oklab, var(--accent) 22%, transparent); }
   .tagline { font-size: 1.25rem; font-weight: 600; color: var(--accent-ink); margin: 6px 0 10px; }
   .summary { max-width: 38em; margin: 0 0 22px; }
+
+  .demo { padding-top: 18px; }
+  .demo figure { margin: 0; }
+  .demo-video {
+    width: 100%; height: auto; display: block; border-radius: 18px; border: 1px solid var(--line);
+    background: #000; box-shadow: 0 30px 70px color-mix(in oklab, var(--accent) 14%, transparent);
+  }
+  .demo figcaption { margin-top: 12px; font-size: .9rem; }
 
   .showcase { padding: 10px 0 20px; position: relative; }
   /* Horizontal strips need an obvious way forward, so the arrows sit on the
@@ -145,6 +175,27 @@ const d = app.data;
 </style>
 
 <script>
+  // The demo plays itself once it is on screen and stops when it leaves, so
+  // it never runs in a background tab. Reduced motion leaves it paused with
+  // its poster and controls.
+  const demo = document.querySelector<HTMLVideoElement>('[data-demo]');
+  if (demo && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const en of entries) {
+          if (en.isIntersecting) {
+            demo.preload = 'auto';
+            demo.play().catch(() => {});
+          } else {
+            demo.pause();
+          }
+        }
+      },
+      { threshold: 0.4 },
+    );
+    io.observe(demo);
+  }
+
   // Arrow controls for the screenshot strip. Kept out of the animation
   // bundle so they still work with reduced motion, where that never loads.
   const strip = document.querySelector<HTMLElement>('[data-shots]');

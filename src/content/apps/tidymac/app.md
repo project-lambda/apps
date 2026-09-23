@@ -7,6 +7,10 @@ accent: '#38BDF8'
 category: Utilities
 status: coming-soon
 order: 2
+video:
+  file: media/tidymac.mp4
+  poster: ./video-poster.jpg
+  caption: A scan from open to finished, in real time.
 screenshots:
   - ./screenshots/01-clean.webp
   - ./screenshots/02-apps.webp

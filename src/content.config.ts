@@ -29,6 +29,17 @@ const apps = defineCollection({
       /** 512px icon. Omit it and the site shows a lettered tile instead. */
       icon: image().optional(),
       screenshots: z.array(image()).default([]),
+      /**
+       * A demo recording. `file` is a path under public/, because video is
+       * shipped as-is rather than processed like images.
+       */
+      video: z
+        .object({
+          file: z.string(),
+          poster: image(),
+          caption: z.string().optional(),
+        })
+        .optional(),
       /** Brand colour for this app's pages. */
       accent: z.string().regex(/^#[0-9a-fA-F]{6}$/).default('#1FC98A'),
       category: z.string(),
