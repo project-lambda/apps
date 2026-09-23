@@ -1,5 +1,5 @@
 ---
-effectiveDate: 2026-09-22
+effectiveDate: 2026-09-23
 ---
 
 TidyMac is made by Abdullah Emroze. This policy explains what happens to your
@@ -22,14 +22,29 @@ you uninstall the app.
 
 ## What TidyMac removes
 
-Nothing is removed until you have seen the list and confirmed it. Files go to
-the Trash, so you can restore them until you empty it.
+Nothing is removed until you have seen the list and confirmed it. Files you
+clean go to the Trash, so you can restore them until you empty it. Uninstalling
+an app and emptying the Trash delete permanently; TidyMac says so before you
+confirm. Deleting an app that an installer set up for all users asks for your
+Mac password through the standard macOS prompt; TidyMac never sees or stores it.
 
 ## Network use
 
-TidyMac checks for updates, and activates your licence when you enter its key.
-These requests reveal your device's IP address and the app version, as any web
-request does. They contain nothing about your files.
+TidyMac makes these network requests, and no others:
+
+- **Updates for your apps.** When the Apps tab lists your apps, TidyMac checks
+  whether they have updates. For apps that update themselves with Sparkle, it
+  downloads that app's public update feed from the app's own developer. For
+  apps installed with Homebrew, it asks Homebrew.
+- **Updating an app.** Only when you press Update on an app installed with
+  Homebrew.
+- **Speed test.** Only when you press Test Speed in the menu bar, using the
+  networkQuality tool built into macOS, which measures against Apple's servers.
+
+Like any web request, these reveal your device's IP address to the server that
+answers, and an update feed request tells that app's developer the app is
+installed. They contain nothing about your files. TidyMac has no licence key and
+does not check for updates to itself.
 
 ## Children
 
