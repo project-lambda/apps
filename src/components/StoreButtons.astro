@@ -1,27 +1,55 @@
 ---
+import { statSync } from 'node:fs';
+import { join } from 'node:path';
 import type { CollectionEntry } from 'astro:content';
+import { href } from '../lib/paths';
 
 interface Props {
   app: CollectionEntry<'apps'>;
 }
 
-const { status, stores, name } = Astro.props.app.data;
+const { id, data } = Astro.props.app;
+const { status, stores, name, mac } = data;
 const links = [
   stores.googlePlay && { label: 'Get it on Google Play', url: stores.googlePlay },
   stores.appStore && { label: 'Download on the App Store', url: stores.appStore },
   stores.web && { label: 'Open on the web', url: stores.web },
 ].filter(Boolean) as { label: string; url: string }[];
+
+// Statting the file also fails the build when app.md points at a download
+// that was never copied into public/.
+const macSize = mac && `${Math.round(statSync(join(process.cwd(), 'public', mac.file)).size / 1e6)} MB`;
+const showMac = mac && status !== 'retired';
+const upcoming = [stores.googlePlay && 'Google Play', stores.appStore && 'the App Store'].filter(Boolean);
 ---
+
+{
+  showMac && (
+    <div class="mac">
+      <a class="button" href={href(mac.file)} download>
+        Download for Mac <span class="arrow">↓</span>
+      </a>
+      <p class="meta muted">
+        Version {mac.version} · {macSize} · macOS {mac.minimumOS} or later · Apple Silicon and Intel.
+        First time opening it? <a href={href(`${id}/support/`)}>Here is how</a>.
+      </p>
+    </div>
+  )
+}
 
 {
   status === 'live' && links.length > 0 ? (
     <div class="stores">
       {links.map((l, i) => (
-        <a class:list={['button', { secondary: i > 0 }]} href={l.url} rel="noopener">
+        <a class:list={['button', { secondary: i > 0 || showMac }]} href={l.url} rel="noopener">
           {l.label}
         </a>
       ))}
     </div>
+  ) : status === 'coming-soon' && showMac ? (
+    upcoming.length > 0 && (
+      <p class="soon"><span class="pill">Coming soon</span> {name} is on its way to {upcoming.join(' and ')}.</p>
+    )
   ) : status === 'coming-soon' ? (
     <p class="soon"><span class="pill">Coming soon</span> {name} is still in development. This page gets a link the day it ships.</p>
   ) : status === 'retired' ? (
@@ -32,4 +60,6 @@ const links = [
 <style>
   .stores { display: flex; flex-wrap: wrap; gap: 10px; }
   .soon { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; color: var(--muted); margin: 0; }
+  .mac { margin-bottom: 18px; }
+  .meta { font-size: .88rem; margin: 10px 0 0; max-width: 34em; }
 </style>

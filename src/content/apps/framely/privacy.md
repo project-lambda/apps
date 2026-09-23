@@ -1,5 +1,6 @@
 ---
 effectiveDate: 2026-09-22
+updated: 2026-09-23
 ---
 
 Framely is made by Abdullah Emroze. This policy explains what happens to your
@@ -12,8 +13,8 @@ account, no analytics, no advertising and no tracking.
 
 ## Photos and screenshots
 
-When you add a screenshot, you choose it with your device's photo picker.
-Framely can only see the images you pick. They are processed entirely on your
+When you add a screenshot, you choose it with your device's photo or file
+picker. Framely can only see the images you pick. They are processed entirely on your
 device to build your designs, and they are never uploaded to us or anyone
 else.
 
@@ -22,8 +23,9 @@ are deleted when you delete a project or uninstall the app.
 
 ## Exports
 
-When you export, the finished images are saved to your photo library or
-handed to the app you choose in the share sheet. What happens after that is
+When you export, the finished images are saved to your photo library (on a
+phone) or to a Framely folder in your Downloads (on a Mac), or handed to the
+app you choose in the share sheet. What happens after that is
 governed by that app's own policy.
 
 ## Network use

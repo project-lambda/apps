@@ -12,6 +12,8 @@ import { z } from 'astro/zod';
  *     icon.png      512px icon
  *     screenshots/  phone screenshots, listed in app.md
  *
+ * Downloads and demo videos live under public/ and are referenced by path.
+ *
  * Folders starting with _ are ignored, so _template can live alongside.
  */
 const base = './src/content/apps';
@@ -54,6 +56,18 @@ const apps = defineCollection({
           web: z.url().optional(),
         })
         .default({}),
+      /**
+       * A direct macOS download. `file` is a path under public/, shipped
+       * as-is. Its button shows while the stores are still coming soon.
+       */
+      mac: z
+        .object({
+          file: z.string(),
+          version: z.string(),
+          /** Oldest supported macOS, for example `11`. */
+          minimumOS: z.string(),
+        })
+        .optional(),
       /** Android application ID, shown on the support page. */
       packageName: z.string().optional(),
       features: z.array(z.object({ title: z.string(), text: z.string() })).default([]),
