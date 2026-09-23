@@ -70,7 +70,16 @@ const values = [
       <section class="showcase" aria-label="Screenshots from the apps">
         <div class="fade-l" /><div class="fade-r" />
         <div class="rail" data-rail>
-          {shots.map((s) => <Image src={s.src} alt={`${s.name} screenshot`} height={360} densities={[1, 2]} class="shot" />)}
+          {shots.map((s) => (
+            <Image
+              src={s.src}
+              alt={`${s.name} screenshot`}
+              height={360}
+              densities={[1, 2]}
+              class="shot"
+              style={`--ar:${(s.src.width / s.src.height).toFixed(4)}`}
+            />
+          ))}
         </div>
       </section>
     )
@@ -157,7 +166,8 @@ const values = [
   .showcase { position: relative; z-index: 2; padding: 70px 0 10px; overflow: hidden; }
   .rail { display: flex; gap: 18px; width: max-content; will-change: transform; }
   .rail :global(.shot) {
-    height: 360px; width: auto; border-radius: 18px; border: 1px solid var(--line);
+    height: min(360px, 42vh, calc(76vw / var(--ar, 1.6))); width: auto;
+    border-radius: 18px; border: 1px solid var(--line);
     filter: saturate(.9) brightness(.95); transition: transform .6s var(--ease-out), filter .6s var(--ease);
   }
   .rail :global(.shot:hover) { transform: translateY(-10px) scale(1.03); filter: none; }

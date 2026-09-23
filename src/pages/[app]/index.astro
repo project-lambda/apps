@@ -40,7 +40,14 @@ const d = app.data;
         <button class="nudge next" type="button" aria-label="More screenshots" data-shots-next>›</button>
         <div class="strip" data-shots>
           {d.screenshots.map((shot, i) => (
-            <Image src={shot} alt={`${d.name} screenshot ${i + 1}`} height={520} densities={[1, 2]} class="shot" />
+            <Image
+              src={shot}
+              alt={`${d.name} screenshot ${i + 1}`}
+              height={520}
+              densities={[1, 2]}
+              class="shot"
+              style={`--ar:${(shot.width / shot.height).toFixed(4)}`}
+            />
           ))}
         </div>
       </section>
@@ -111,7 +118,11 @@ const d = app.data;
     padding: 10px max(22px, calc((100vw - 1120px) / 2)) 20px;
   }
   .shot {
-    height: 520px; width: auto; border-radius: 18px; border: 1px solid var(--line); flex: none; scroll-snap-align: center;
+    /* A definite height keeps the space reserved before the image loads;
+       the third term is what stops a wide shot running off a narrow screen. */
+    height: min(520px, 62vh, calc(88vw / var(--ar, 1.6)));
+    width: auto;
+    border-radius: 18px; border: 1px solid var(--line); flex: none; scroll-snap-align: center;
     filter: saturate(.92); transition: transform .6s var(--ease-out), filter .6s var(--ease);
   }
   .shot:hover { transform: translateY(-10px) scale(1.02); filter: none; }
@@ -125,8 +136,11 @@ const d = app.data;
 
   @media (max-width: 680px) {
     .hero { flex-direction: column; gap: 20px; padding-top: 40px; }
-    .shot { height: 380px; }
-    .nudge { width: 44px; height: 44px; font-size: 1.6rem; }
+    .shot { height: min(54vh, calc(84vw / var(--ar, 1.6))); }
+    .strip { padding-inline: 7vw; gap: 12px; }
+    .nudge { width: 42px; height: 42px; font-size: 1.5rem; }
+    .nudge.prev { left: 6px; }
+    .nudge.next { right: 6px; }
   }
 </style>
 
