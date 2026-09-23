@@ -1,5 +1,5 @@
 ---
-effectiveDate: 2026-09-22
+effectiveDate: 2026-09-24
 ---
 
 PhotoRelay is made by Abdullah Emroze. This policy explains what happens to
@@ -47,6 +47,14 @@ PhotoRelay asks for access to your photo library so it can transfer your
 photos and videos, and for local network access so it can find your devices
 and servers. On Mac, full disk access is optional and only needed to read or
 write folders outside your home folder.
+
+Location is used only if you create an autotransfer rule that starts when you
+arrive somewhere or join a named Wi-Fi network (reading a Wi-Fi network's name
+requires location permission). It is checked on your device while PhotoRelay
+is open and is never sent anywhere.
+
+Notifications show a transfer's progress and a summary when it finishes. They
+are created on your device; PhotoRelay sends no push notifications.
 
 ## Children
 
