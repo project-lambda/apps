@@ -9,7 +9,7 @@ interface Props {
 }
 
 const { id, data } = Astro.props.app;
-const { status, stores, name, mac } = data;
+const { status, stores, name, mac, android } = data;
 const links = [
   stores.googlePlay && { label: 'Get it on Google Play', url: stores.googlePlay },
   stores.appStore && { label: 'Download on the App Store', url: stores.appStore },
@@ -18,20 +18,40 @@ const links = [
 
 // Statting the file also fails the build when app.md points at a download
 // that was never copied into public/.
-const macSize = mac && `${Math.round(statSync(join(process.cwd(), 'public', mac.file)).size / 1e6)} MB`;
-const showMac = mac && status !== 'retired';
+const size = (file: string) => `${Math.round(statSync(join(process.cwd(), 'public', file)).size / 1e6)} MB`;
+const downloads =
+  status === 'retired'
+    ? []
+    : ([
+        mac && {
+          label: 'Download for Mac',
+          file: mac.file,
+          meta: `Mac · version ${mac.version} · ${size(mac.file)} · macOS ${mac.minimumOS} or later, Apple Silicon and Intel`,
+        },
+        android && {
+          label: 'Download the APK',
+          file: android.file,
+          meta: `Android · version ${android.version} · ${size(android.file)} · Android ${android.minimumOS} or later`,
+        },
+      ].filter(Boolean) as { label: string; file: string; meta: string }[]);
 const upcoming = [stores.googlePlay && 'Google Play', stores.appStore && 'the App Store'].filter(Boolean);
 ---
 
 {
-  showMac && (
-    <div class="mac">
-      <a class="button" href={href(mac.file)} download>
-        Download for Mac <span class="arrow">↓</span>
-      </a>
+  downloads.length > 0 && (
+    <div class="downloads">
+      <div class="stores">
+        {downloads.map((d, i) => (
+          <a class:list={['button', { secondary: i > 0 }]} href={href(d.file)} download>
+            {d.label} <span class="arrow">↓</span>
+          </a>
+        ))}
+      </div>
+      {downloads.map((d) => (
+        <p class="meta muted">{d.meta}</p>
+      ))}
       <p class="meta muted">
-        Version {mac.version} · {macSize} · macOS {mac.minimumOS} or later · Apple Silicon and Intel.
-        First time opening it? <a href={href(`${id}/support/`)}>Here is how</a>.
+        First time installing? <a href={href(`${id}/support/`)}>Here is how</a>.
       </p>
     </div>
   )
@@ -41,12 +61,12 @@ const upcoming = [stores.googlePlay && 'Google Play', stores.appStore && 'the Ap
   status === 'live' && links.length > 0 ? (
     <div class="stores">
       {links.map((l, i) => (
-        <a class:list={['button', { secondary: i > 0 || showMac }]} href={l.url} rel="noopener">
+        <a class:list={['button', { secondary: i > 0 || downloads.length > 0 }]} href={l.url} rel="noopener">
           {l.label}
         </a>
       ))}
     </div>
-  ) : status === 'coming-soon' && showMac ? (
+  ) : status === 'coming-soon' && downloads.length > 0 ? (
     upcoming.length > 0 && (
       <p class="soon"><span class="pill">Coming soon</span> {name} is on its way to {upcoming.join(' and ')}.</p>
     )
@@ -60,6 +80,7 @@ const upcoming = [stores.googlePlay && 'Google Play', stores.appStore && 'the Ap
 <style>
   .stores { display: flex; flex-wrap: wrap; gap: 10px; }
   .soon { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; color: var(--muted); margin: 0; }
-  .mac { margin-bottom: 18px; }
-  .meta { font-size: .88rem; margin: 10px 0 0; max-width: 34em; }
+  .downloads { margin-bottom: 18px; }
+  .downloads .stores { margin-bottom: 12px; }
+  .meta { font-size: .88rem; margin: 4px 0 0; max-width: 38em; }
 </style>

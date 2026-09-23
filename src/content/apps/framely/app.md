@@ -11,12 +11,17 @@ order: 1
 packageName: com.emroze.framely
 stores:
   googlePlay: https://play.google.com/store/apps/details?id=com.emroze.framely
-# The Mac build ships ahead of the stores. Rebuild with
-# tool/macos/build_dmg.sh in the Framely repo and replace the file.
+# Direct downloads ship ahead of the stores. In the Framely repo, rebuild
+# the Mac DMG with tool/macos/build_dmg.sh and the APK with
+# `flutter build apk --release`, then replace the files in public/downloads.
 mac:
   file: downloads/Framely-1.0.0.dmg
   version: 1.0.0
   minimumOS: '11'
+android:
+  file: downloads/Framely-1.0.0.apk
+  version: 1.0.0
+  minimumOS: '7.0'
 screenshots:
   - ./screenshots/01-frame.png
   - ./screenshots/02-templates.png
@@ -45,6 +50,10 @@ faq:
     a: App Store 6.9", 6.7", 6.5", 5.5" and iPad, Google Play phone, tablet and feature graphic, plus square, story and social link images.
   - q: Where do exported images go?
     a: On a phone, to a Framely album in your photos or to any app you pick from the share sheet. On a Mac, to a Framely folder in your Downloads, or to any app you pick from the share menu.
+  - q: How do I install the Android APK?
+    a: Download the APK on your phone and open it. Android asks you to allow installs from your browser or Files app the first time; allow it, then tap Install. Framely needs Android 7.0 or later.
+  - q: Can I switch from the APK to Google Play later?
+    a: Google Play signs its copy with a different key, so it will not update the APK version in place. Uninstall the APK first, then install from Google Play. Export anything you want to keep before uninstalling, because uninstalling removes your projects.
   - q: Which Macs does Framely run on?
     a: macOS 11 Big Sur and later, on Apple Silicon and Intel. It is a direct download from this page.
   - q: My Mac says Framely cannot be opened. What do I do?

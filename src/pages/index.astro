@@ -55,8 +55,10 @@ const values = [
             </div>
             <p class="muted">{app.data.summary}</p>
             <p class="chips">
-              {app.data.mac ? (
-                <span class="pill">Mac download</span>
+              {app.data.mac || app.data.android ? (
+                <span class="pill">
+                  {[app.data.mac && 'Mac', app.data.android && 'Android'].filter(Boolean).join(' + ')} download
+                </span>
               ) : (
                 app.data.status === 'coming-soon' && <span class="pill">Coming soon</span>
               )}

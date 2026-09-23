@@ -68,6 +68,18 @@ const apps = defineCollection({
           minimumOS: z.string(),
         })
         .optional(),
+      /**
+       * A direct Android download, an APK under public/. Shows alongside the
+       * Google Play button, even before the Play listing is live.
+       */
+      android: z
+        .object({
+          file: z.string(),
+          version: z.string(),
+          /** Oldest supported Android, for example `7.0`. */
+          minimumOS: z.string(),
+        })
+        .optional(),
       /** Android application ID, shown on the support page. */
       packageName: z.string().optional(),
       features: z.array(z.object({ title: z.string(), text: z.string() })).default([]),
