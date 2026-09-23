@@ -21,8 +21,10 @@
   -webkit-font-smoothing: antialiased;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
+/* Dark is the site, not a preference: the WebGL network, the gradients and
+   the screenshots are all built for it. The light palette stays here only
+   for a deliberate data-theme="light", which nothing sets today. */
+:root[data-theme='light'] {
     --bg: #f7f7f5;
     --surface: color-mix(in oklab, #ffffff 76%, transparent);
     --surface-2: #eeefec;
@@ -31,7 +33,6 @@
     --line: color-mix(in oklab, #dcddd8 88%, transparent);
     --accent-ink: color-mix(in oklab, var(--accent) 55%, black);
     color-scheme: light;
-  }
 }
 
 * { box-sizing: border-box; }
