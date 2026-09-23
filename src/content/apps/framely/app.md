@@ -15,12 +15,12 @@ stores:
 # the Mac DMG with tool/macos/build_dmg.sh and the APK with
 # `flutter build apk --release`, then replace the files in public/downloads.
 mac:
-  file: downloads/Framely-1.0.0.dmg
-  version: 1.0.0
+  file: downloads/Framely-1.0.1.dmg
+  version: 1.0.1
   minimumOS: '11'
 android:
-  file: downloads/Framely-1.0.0.apk
-  version: 1.0.0
+  file: downloads/Framely-1.0.1.apk
+  version: 1.0.1
   minimumOS: '7.0'
 screenshots:
   - ./screenshots/01-frame.png
