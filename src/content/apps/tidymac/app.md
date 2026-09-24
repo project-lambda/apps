@@ -10,8 +10,8 @@ order: 2
 # Direct download ahead of any store. Rebuild with scripts/build_dmg.sh in
 # the TidyMac repo and replace the file.
 mac:
-  file: downloads/TidyMac-0.1.0.dmg
-  version: 0.1.0
+  file: downloads/TidyMac-0.1.0-2.dmg
+  version: 0.1.0 (build 2)
   minimumOS: '14'
 video:
   file: media/tidymac.mp4
