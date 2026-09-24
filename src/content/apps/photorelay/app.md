@@ -12,12 +12,12 @@ packageName: com.emroze.photo_relay
 # Mac DMG with tool/macos/build_dmg.sh and the APK with
 # `flutter build apk --release`, then replace the files in public/downloads.
 mac:
-  file: downloads/PhotoRelay-1.0.2.dmg
-  version: 1.0.2
+  file: downloads/PhotoRelay-1.0.3.dmg
+  version: 1.0.3
   minimumOS: '10.15'
 android:
-  file: downloads/PhotoRelay-1.0.2.apk
-  version: 1.0.2
+  file: downloads/PhotoRelay-1.0.3.apk
+  version: 1.0.3
   minimumOS: '7.0'
 screenshots:
   - ./screenshots/01-mac-home.webp
