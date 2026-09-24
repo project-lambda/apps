@@ -34,39 +34,42 @@ const downloads =
           meta: `Android · version ${android.version} · ${size(android.file)} · Android ${android.minimumOS} or later`,
         },
       ].filter(Boolean) as { label: string; file: string; meta: string }[]);
+// Store listings come first once the app is live; direct downloads follow.
+const buttons = [
+  ...(status === 'live' ? links.map((l) => ({ ...l, download: false })) : []),
+  ...downloads.map((d) => ({ label: d.label, url: href(d.file), download: true })),
+];
 const upcoming = [stores.googlePlay && 'Google Play', stores.appStore && 'the App Store'].filter(Boolean);
 ---
 
 {
-  downloads.length > 0 && (
-    <div class="downloads">
+  buttons.length > 0 && (
+    <div class="get">
       <div class="stores">
-        {downloads.map((d, i) => (
-          <a class:list={['button', { secondary: i > 0 }]} href={href(d.file)} download>
-            {d.label} <span class="arrow">↓</span>
+        {buttons.map((b, i) => (
+          <a
+            class:list={['button', { secondary: i > 0 }]}
+            href={b.url}
+            {...(b.download ? { download: true } : { rel: 'noopener' })}
+          >
+            {b.label} {b.download && <span class="arrow">↓</span>}
           </a>
         ))}
       </div>
       {downloads.map((d) => (
         <p class="meta muted">{d.meta}</p>
       ))}
-      <p class="meta muted">
-        First time installing? <a href={href(`${id}/support/`)}>Here is how</a>.
-      </p>
+      {downloads.length > 0 && (
+        <p class="meta muted">
+          Installing a download for the first time? <a href={href(`${id}/support/`)}>Here is how</a>.
+        </p>
+      )}
     </div>
   )
 }
 
 {
-  status === 'live' && links.length > 0 ? (
-    <div class="stores">
-      {links.map((l, i) => (
-        <a class:list={['button', { secondary: i > 0 || downloads.length > 0 }]} href={l.url} rel="noopener">
-          {l.label}
-        </a>
-      ))}
-    </div>
-  ) : status === 'coming-soon' && downloads.length > 0 ? (
+  status === 'coming-soon' && downloads.length > 0 ? (
     upcoming.length > 0 && (
       <p class="soon"><span class="pill">Coming soon</span> {name} is on its way to {upcoming.join(' and ')}.</p>
     )
@@ -80,7 +83,7 @@ const upcoming = [stores.googlePlay && 'Google Play', stores.appStore && 'the Ap
 <style>
   .stores { display: flex; flex-wrap: wrap; gap: 10px; }
   .soon { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; color: var(--muted); margin: 0; }
-  .downloads { margin-bottom: 18px; }
-  .downloads .stores { margin-bottom: 12px; }
+  .get { margin-bottom: 18px; }
+  .get .stores { margin-bottom: 12px; }
   .meta { font-size: .88rem; margin: 4px 0 0; max-width: 38em; }
 </style>

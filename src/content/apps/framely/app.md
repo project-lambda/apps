@@ -5,8 +5,7 @@ summary: Turn plain app screenshots into polished App Store and Google Play imag
 icon: ./icon.png
 accent: '#1FC98A'
 category: Productivity
-# Change to `live` once the app is published; that shows the store button.
-status: coming-soon
+status: live
 order: 1
 packageName: com.emroze.framely
 stores:
