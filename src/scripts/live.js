@@ -30,11 +30,14 @@ export function start() {
   const cursor = coarse ? null : initCursor();
   const lenis = initScroll();
   const three = initGL();
-  initCards();
+  // Tilt and magnets follow a cursor; a touch screen has none, and the
+  // pointer position would otherwise sit at the centre of the screen and
+  // lean whatever card happens to be there.
+  if (!coarse) initCards();
   initReveals();
   const wordmark = initWordmark();
   const rail = initRail();
-  const magnets = [...document.querySelectorAll('.magnetic')];
+  const magnets = coarse ? [] : [...document.querySelectorAll('.magnetic')];
   const prog = document.querySelector('.progress');
   const head = document.querySelector('[data-header]');
 
@@ -67,7 +70,7 @@ export function start() {
       el.style.transform = `translate(${(dx * k).toFixed(2)}px, ${(dy * k).toFixed(2)}px)`;
     }
 
-    if (Math.abs(M.velocity) > 0.03) refreshHotCard();
+    if (!coarse && Math.abs(M.velocity) > 0.03) refreshHotCard();
 
     const y = lenis ? M.scroll : scrollY;
     const max = document.documentElement.scrollHeight - innerHeight;
@@ -88,9 +91,12 @@ export function start() {
   function initScroll() {
     const l = new Lenis({ duration: 1.1, smoothWheel: true, lerp: 0.09 });
     l.on('scroll', ({ scroll, velocity }) => { M.scroll = scroll; M.velocity = velocity; });
-    for (const a of document.querySelectorAll('a[href^="#"]')) {
+    // In-page links, written either as #id or as /#id from the header.
+    for (const a of document.querySelectorAll('a[href*="#"]')) {
+      const url = new URL(a.href, location.href);
+      if (url.pathname !== location.pathname || !url.hash) continue;
       a.addEventListener('click', (e) => {
-        const el = document.querySelector(a.getAttribute('href'));
+        const el = document.querySelector(url.hash);
         if (!el) return;
         e.preventDefault();
         l.scrollTo(el, { offset: -80 });

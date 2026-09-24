@@ -49,13 +49,15 @@ const year = new Date().getFullYear();
     <Backdrop />
 
     <header class="site-header" data-header>
-      <div class="wrap bar">
+      <div class="bar glass" data-liquid="34" data-bezel="16">
         <a class="brand" href={href()} data-cursor>
-          <Logo size={27} id="brand-mark" />
-          {site.name}
+          <Logo size={30} id="brand-mark" />
+          <span class="brand-name">{site.name}</span>
         </a>
-        <nav class="site-nav" aria-label="Site">
+        <nav class="site-nav" aria-label="Site" data-nav>
+          <span class="nav-lens" aria-hidden="true"></span>
           <a href={href()}>Apps</a>
+          <a href={`${href()}#approach`}>Approach</a>
           <a href={`mailto:${site.email}`}>Contact</a>
         </nav>
       </div>
@@ -78,5 +80,10 @@ const year = new Date().getFullYear();
         </button>
       </div>
     </footer>
+
+    <script>
+      import { startGlass } from '../scripts/glass.js';
+      startGlass();
+    </script>
   </body>
 </html>
