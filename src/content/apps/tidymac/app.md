@@ -7,11 +7,11 @@ accent: '#38BDF8'
 category: Utilities
 status: coming-soon
 order: 2
-# Direct download ahead of any store. Rebuild with scripts/build_dmg.sh in
-# the TidyMac repo and replace the file.
+# Direct download ahead of any store. Rebuild with scripts/release.sh in
+# the TidyMac repo (Developer ID signed and notarized) and replace the file.
 mac:
-  file: downloads/TidyMac-0.1.0-2.dmg
-  version: 0.1.0 (build 2)
+  file: downloads/TidyMac-0.1.0-3.dmg
+  version: 0.1.0 (build 3)
   minimumOS: '14'
 video:
   file: media/tidymac.mp4
@@ -33,7 +33,7 @@ features:
   - title: Analyze
     text: A map of where your disk space actually went, folder by folder.
   - title: Status
-    text: A live dashboard for CPU, memory, disk, network, battery and fans, with the processes behind them.
+    text: A live dashboard for CPU, memory, disk, network, battery and fans, with the processes behind them. The same numbers sit in the menu bar, which opens with your Mac.
   - title: One window, no subscription
     text: Five tabs in a single native window. Built for Apple Silicon and Intel.
 faq:
@@ -43,8 +43,10 @@ faq:
     a: macOS 14 Sonoma and later, on Apple Silicon and Intel.
   - q: Is it on the Mac App Store?
     a: No. TidyMac needs access the App Store sandbox does not allow, so it is a direct download from this page.
-  - q: macOS says it cannot check TidyMac for malicious software. What do I do?
-    a: The Mac build is not notarized by Apple yet, so macOS asks you to confirm it once. Drag TidyMac into Applications and open it. When the warning appears, open System Settings, go to Privacy & Security, scroll down and click Open Anyway next to TidyMac, then confirm. After that it opens normally.
+  - q: Is the download signed?
+    a: Yes. TidyMac is signed with a Developer ID and notarized by Apple, so it opens like any other app. Drag it into Applications and open it from there.
+  - q: Does TidyMac start when my Mac starts?
+    a: Yes, as a small icon in the menu bar with live stats and a shortcut to the app. Turn it off with the Open at login switch in that menu, or in System Settings under General, Login Items.
   - q: Is TidyMac free?
     a: Yes. No subscription, no account and no ads.
 ---
