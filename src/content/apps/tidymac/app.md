@@ -34,8 +34,8 @@ features:
     text: A map of where your disk space actually went, folder by folder.
   - title: Status
     text: A live dashboard for CPU, memory, disk, network, battery and fans, with the processes behind them. The same numbers sit in the menu bar, which opens with your Mac.
-  - title: One window, no subscription
-    text: Five tabs in a single native window. Built for Apple Silicon and Intel.
+  - title: Light, fast, no subscription
+    text: Five tabs in one native window, built for Apple Silicon and Intel. Under 5 MB to download and under 9 MB installed, and a full scan of a well-used Mac takes about half a minute.
 faq:
   - q: Does TidyMac delete anything without asking?
     a: No. Every clean shows the full list first, and cleaned files go to the Trash so you can put them back. Uninstalling an app and emptying the Trash delete permanently, and TidyMac says so before you confirm.
