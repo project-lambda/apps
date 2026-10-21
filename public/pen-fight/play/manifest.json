@@ -2,11 +2,13 @@
     "name": "Pen Fight",
     "short_name": "Pen Fight",
     "start_url": ".",
-    "display": "standalone",
+    "display": "fullscreen",
     "background_color": "#0E1220",
     "theme_color": "#0E1220",
     "description": "Flick-pen duel on a school desk. Offline, no ads, no sign-in.",
-    "categories": ["games"],
+    "categories": [
+        "games"
+    ],
     "orientation": "any",
     "prefer_related_applications": false,
     "icons": [
@@ -32,5 +34,9 @@
             "type": "image/png",
             "purpose": "maskable"
         }
+    ],
+    "display_override": [
+        "fullscreen",
+        "standalone"
     ]
 }
