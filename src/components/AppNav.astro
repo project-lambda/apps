@@ -1,19 +1,21 @@
 ---
-import type { CollectionEntry } from 'astro:content';
+import { getEntry, type CollectionEntry } from 'astro:content';
 import AppIcon from './AppIcon.astro';
 import { href } from '../lib/paths';
 
 interface Props {
   app: CollectionEntry<'apps'>;
-  current: 'overview' | 'privacy' | 'terms' | 'support' | 'delete-account';
+  current: 'overview' | 'privacy' | 'terms' | 'data-safety' | 'support' | 'delete-account';
   hasTerms: boolean;
 }
 
 const { app, current, hasTerms } = Astro.props;
+const dataSafety = await getEntry('dataSafety', app.id);
 const tabs = [
   { key: 'overview', label: 'Overview', path: `${app.id}/` },
   { key: 'privacy', label: 'Privacy', path: `${app.id}/privacy/` },
   ...(hasTerms ? [{ key: 'terms', label: 'Terms', path: `${app.id}/terms/` }] : []),
+  ...(dataSafety ? [{ key: 'data-safety', label: 'Data safety', path: `${app.id}/data-safety/` }] : []),
   { key: 'support', label: 'Support', path: `${app.id}/support/` },
   ...(app.data.accounts
     ? [{ key: 'delete-account', label: 'Delete account', path: `${app.id}/delete-account/` }]

@@ -9,6 +9,7 @@ import { z } from 'astro/zod';
  *     app.md        store info (frontmatter) and the long description (body)
  *     privacy.md    privacy policy, required
  *     terms.md      terms of use, optional
+ *     data-safety.md  what data the app handles, optional
  *     icon.png      512px icon
  *     screenshots/  phone screenshots, listed in app.md
  *
@@ -116,4 +117,9 @@ const terms = defineCollection({
   schema: policy,
 });
 
-export const collections = { apps, policies, terms };
+const dataSafety = defineCollection({
+  loader: glob({ pattern: '[!_]*/data-safety.md', base, generateId: byFolder }),
+  schema: policy,
+});
+
+export const collections = { apps, policies, terms, dataSafety };

@@ -6,13 +6,14 @@ import { formatDate } from '../lib/paths';
 
 interface Props {
   app: CollectionEntry<'apps'>;
-  kind: 'privacy' | 'terms';
-  entry: CollectionEntry<'policies'> | CollectionEntry<'terms'>;
+  kind: 'privacy' | 'terms' | 'data-safety';
+  entry: CollectionEntry<'policies'> | CollectionEntry<'terms'> | CollectionEntry<'dataSafety'>;
   hasTerms: boolean;
 }
 
 const { app, kind, entry, hasTerms } = Astro.props;
-const heading = kind === 'privacy' ? 'Privacy Policy' : 'Terms of Use';
+const headings = { privacy: 'Privacy Policy', terms: 'Terms of Use', 'data-safety': 'Data Safety' };
+const heading = headings[kind];
 const { effectiveDate, updated } = entry.data;
 ---
 

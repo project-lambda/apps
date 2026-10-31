@@ -14,6 +14,7 @@ For an app in `src/content/apps/framely/`:
 | `/framely/` | `app.md`: listing, screenshots, features, long description |
 | `/framely/privacy/` | `privacy.md` (required; the build fails without it) |
 | `/framely/terms/` | `terms.md`, only if present |
+| `/framely/data-safety/` | `data-safety.md`, only if present |
 | `/framely/support/` | Contact, FAQ and app details from `app.md` |
 | `/framely/delete-account/` | The `accounts` block in `app.md`, only if present |
 | `/app-ads.txt` | `appAdsTxt` in `src/site.config.ts` |

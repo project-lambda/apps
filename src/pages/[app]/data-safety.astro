@@ -1,0 +1,21 @@
+---
+import { getCollection, getEntry, render } from 'astro:content';
+import Document from '../../components/Document.astro';
+
+export async function getStaticPaths() {
+  const apps = await getCollection('apps');
+  const entries = await getCollection('dataSafety');
+  return entries.flatMap((entry) => {
+    const app = apps.find((a) => a.id === entry.id);
+    return app ? [{ params: { app: app.id }, props: { app, entry } }] : [];
+  });
+}
+
+const { app, entry } = Astro.props;
+const { Content } = await render(entry);
+const terms = await getEntry('terms', app.id);
+---
+
+<Document app={app} kind="data-safety" entry={entry} hasTerms={!!terms}>
+  <Content />
+</Document>
