@@ -14,6 +14,16 @@ accent: '#0F766E'
 category: Productivity
 status: coming-soon
 order: 1
+packageName: com.projectlambda.hushtype
+# A direct Android download ahead of Google Play: the release APK signed with
+# the upload key, arm64 only (every phone Hushtype Small runs on, and under
+# GitHub's 100 MB file limit). In the Hushtype repo, from android/:
+# ./gradlew assembleRelease -PhtAbiFilter=arm64-v8a, then
+# replace the file in public/downloads.
+android:
+  file: downloads/Hushtype-0.9.0.apk
+  version: 0.9.0
+  minimumOS: '10'
 features:
   - title: One key to fix it
     text: Type the way you always do and tap ✨. You see every change marked before you choose Replace or Insert below, and Undo stays one tap away for 10 seconds.
