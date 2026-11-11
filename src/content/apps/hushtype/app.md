@@ -21,8 +21,8 @@ packageName: com.projectlambda.hushtype
 # ./gradlew assembleRelease -PhtAbiFilter=arm64-v8a, then
 # replace the file in public/downloads.
 android:
-  file: downloads/Hushtype-0.9.1.apk
-  version: 0.9.1
+  file: downloads/Hushtype-1.0.1.apk
+  version: 1.0.1
   minimumOS: '10'
 features:
   - title: One key to fix it
